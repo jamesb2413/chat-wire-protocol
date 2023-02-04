@@ -7,9 +7,15 @@ import socket
 import sys
 import select
 
-print("Connect to Chat:")
-ip = input("Input server socket IP address: ")
-port = int(input("Input server socket port number: "))
+ip = ''
+port = -1
+if len(sys.argv) != 3: 
+    print("Connect to Chat:")
+    ip = input("Input server socket IP address: ")
+    port = int(input("Input server socket port number: "))
+else:
+    ip = str(sys.argv[1]) 
+    port = int(sys.argv[2]) 
 
 # create an INET, STREAMing socket
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
