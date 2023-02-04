@@ -19,7 +19,7 @@ IP_addr = str(sys.argv[1])
 port = int(sys.argv[2])
 
 # bind server to IP_addr at port port
-server.bind(IP_addr, port)
+server.bind((IP_addr, port))
 
 # max 16 users connected to server at once
 server.listen(16)
@@ -27,13 +27,13 @@ clients = []
 
 # listens and broadcasts messages to chat room
 def clientthread(conn, addr):
-    # send welcome message to client when they connect
-    conn.send("Welcome to the chat!")
+    # send welcome message to client when they connect 
+    conn.send(b"Welcome to the chat!")
 
     #server runs constantly
     while True:
         try:
-            # get essage from client, max length 280 chars
+            # get message from client, max length 280 chars
             message = conn.recv(280)
 
             # print user who sent message and message on server terminal

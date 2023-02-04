@@ -49,12 +49,12 @@ else:
 # Now, the user is logged in. Notify the user of possible functions.
 print("Congratulations! You have successfully logged in to your account.")
 # TODO: Call server function to determine number of new messages
-print("Since you last logged in, you have received ", numMessages, "messages.")
+# print("Since you last logged in, you have received ", numMessages, "messages.")
 # Check: Will there be problems if a message arrives between login and beginning of while loop?
 print("If a message arrives while you are logged in, it will be immediately displayed.")
 print("Use the following commands to interact with the chat app:")
-if numMessages > 0:
-    print("R: Read new messages")
+# if numMessages > 0:
+    # print("R: Read new messages")
 print("L: List all accounts that exist on this server.")
 print("S: Send a message to another user.")
 print("D: Delete account.")
@@ -69,12 +69,15 @@ while True:
         # Incoming message
         if read_sock == s: 
             message = read_sock.recv(2048) 
-            print (message) 
+            print(message) 
         # Input from user
         else: 
+            # print("inside else")
             command = sys.stdin.readline() 
-            if command == 'S' or command == 's':
-                message = input("Type the message you would like to broadcast.")
-                server.send(message)
-                print("Message sent.")  
+            # print("command read: '", command, "'")
+            # if command == ' S\n ' or command == ' s\n ':
+            
+            message = input("Type the message you would like to broadcast.")
+            s.send(message.encode())
+            print("Message sent.")  
 s.close() 
