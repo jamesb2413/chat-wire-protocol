@@ -28,7 +28,8 @@ clients = []
 # listens and broadcasts messages to chat room
 def clientthread(conn, addr):
     # send welcome message to client when they connect 
-    conn.send("Welcome to the chat!".encode())
+    welcome_message = "Welcome to the chat"
+    conn.send(welcome_message.encode())
 
     #server runs constantly
     while True:
@@ -42,7 +43,7 @@ def clientthread(conn, addr):
                 
                 # broadcast message to all users in chat
                 broadcast_message = "<" + addr[0] + ">: " + message
-                broadcast(broadcast_message)
+                broadcast(broadcast_message, conn)
             
             # message has no content, remove connection
             else:
@@ -52,13 +53,14 @@ def clientthread(conn, addr):
             continue
 
 # broadcast message to all clients
-def broadcast(message):
+def broadcast(message, connection):
     for client in clients:
-        try:
-            client.send(message.encode())
-        except:
-            client.close()
-            remove(client)
+        if client != connection:
+            try:
+                client.send(message.encode())
+            except:
+                client.close()
+                remove(client)
 
 # removes specified client from chat
 def remove(client):
