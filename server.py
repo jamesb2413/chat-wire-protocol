@@ -20,7 +20,6 @@ port = int(sys.argv[2])
 
 # bind server to IP_addr at port port
 server.bind((IP_addr, port))
-server.bind((IP_addr, port))
 
 # max 16 users connected to server at once
 server.listen(16)
@@ -28,9 +27,8 @@ clients = []
 
 # listens and broadcasts messages to chat room
 def clientthread(conn, addr):
-    welcome_message = "Welcome to the chat!"
     # send welcome message to client when they connect
-    conn.send(welcome_message.encode())
+    conn.send("Welcome to the chat!")
 
     #server runs constantly
     while True:
@@ -44,7 +42,7 @@ def clientthread(conn, addr):
                 
                 # broadcast message to all users in chat
                 broadcast_message = "<" + addr[0] + ">: " + message
-                broadcast(broadcast_message, conn)
+                broadcast(broadcast_message)
             
             # message has no content, remove connection
             else:
@@ -54,14 +52,13 @@ def clientthread(conn, addr):
             continue
 
 # broadcast message to all clients
-def broadcast(message, connection):
+def broadcast(message):
     for client in clients:
-        if client != connection:
-            try:
-                client.send(message.encode())
-            except:
-                client.close()
-                remove(client)
+        try:
+            client.send(message)
+        except:
+            client.close()
+            remove(client)
 
 # removes specified client from chat
 def remove(client):
