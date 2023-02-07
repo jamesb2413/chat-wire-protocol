@@ -41,19 +41,27 @@ while True:
 if existsBool:
     print("Please log in with your username and password.")
     username = input("Username: ")
-    # TODO: Call server function to find username or notify user if username does not exist
+    message = "Signin Existing " + username
+    s.send(message.encode())
 # If user does not have account, sign up
 else:
+    # Watch out for usernames that already exist
     print("Please create your username and password.")
     newUsername = input("New Username: ")
-    # TODO: Call server function to store username or notify user if username is taken
+    message = "Signin New " + newUsername
+    s.send(message.encode())
+
 
 # Now, the user is logged in. Notify the user of possible functions.
 print("Congratulations! You have successfully logged in to your account.")
-# TODO: Call server function to determine number of new messages
-# print("Since you last logged in, you have received ", numMessages, "messages.")
+# Wait for unread messages alert
+while True:
+    message = s.recv(2048).decode()
+    print(message)
+    break
+
 # Check: Will there be problems if a message arrives between login and beginning of while loop?
-print("If a message arrives while you are logged in, it will be immediately displayed.")
+print("If any messages arrive while you are logged in, they will be immediately displayed.")
 print("Use the following commands to interact with the chat app:")
 # if numMessages > 0:
     # print("R: Read new messages")

@@ -26,8 +26,39 @@ server.listen(16)
 clientSockLst = []
 userDict = {}
 
-# def addUser(username, clientSock):
-#     userDict[username] = [clientSock, False, []]
+def addUser(username, clientSock):
+    userDict[username] = [clientSock, True, []]
+    return userDict[username]
+
+def signIn(message, clientSock):
+    # Sign in / create account
+    thisUser = []
+    username = message[2]
+    if message[1] == "Existing":
+        try:
+            thisUser = userDict[username]
+        except:
+            # TODO: Send message to user with username error
+            pass
+    else:
+        thisUser = addUser(username, clientSock)
+    # Unread messages 
+    unreads = userDict[username][2]
+    print(unreads)
+    unreadNum = len(unreads)
+    unreadAlert = "You have " + unreadNum + " unread messages:\n\n"
+    for msg in unreads:
+        unreadAlert += msg + "\n\n"
+    clientSock.sendall(unreadAlert.encode())
+
+def parse(message, clientSock):
+    message = message.split()
+    if message[0] == "Signin":
+        signIn(message, clientSock)
+    else:
+        pass
+        
+        
 
 
 # listens and broadcasts messages to chat room
@@ -37,6 +68,8 @@ def client_thread(clientSock, ip):
         try:
             # get message from client, max length 280 chars
             message = clientSock.recv(280).decode()
+
+            parse(message, clientSock)
 
             # print user who sent message and message on server terminal
             if message:
