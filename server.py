@@ -23,66 +23,65 @@ server.bind((IP_addr, port))
 
 # max 16 users connected to server at once
 server.listen(16)
-clients = []
+clientSockLst = []
+userDict = {}
+
+# def addUser(username, clientSock):
+#     userDict[username] = [clientSock, False, []]
+
 
 # listens and broadcasts messages to chat room
-def clientthread(conn, addr):
-    # send welcome message to client when they connect 
-    welcome_message = "Welcome to the chat"
-    conn.send(welcome_message.encode())
-
+def client_thread(clientSock, ip):
     #server runs constantly
     while True:
         try:
-            # get essage from client, max length 280 chars
-            message = conn.recv(280).decode()
+            # get message from client, max length 280 chars
+            message = clientSock.recv(280).decode()
 
             # print user who sent message and message on server terminal
             if message:
-                print("<" + addr[0] + ">: " + message)
+                print("<" + ip[0] + ">: " + message)
                 
                 # broadcast message to all users in chat
-                broadcast_message = "<" + addr[0] + ">: " + message
-                broadcast(broadcast_message, conn)
+                broadcast_message = "<" + ip[0] + ">: " + message
+                broadcast(broadcast_message, clientSock)
             
             # message has no content, remove connection
             else:
-                remove(conn)
+                remove(clientSock)
 
         except:
             continue
 
 # broadcast message to all clients
-def broadcast(message, connection):
-    for client in clients:
-        if client != connection:
+def broadcast(message, sender):
+    for clientSock in clientSockLst:
+        print(clientSock)
+        if clientSock != sender:
             try:
-                client.send(message.encode())
+                clientSock.send(message.encode())
             except:
-                client.close()
-                remove(client)
+                clientSock.close()
+                remove(clientSock)
 
 # removes specified client from chat
 def remove(client):
-    if client in clients:
-        clients.remove(client)
+    if clientSock in clientSockLst:
+        clientSockLst.remove(clientSock)
 
 # run server indefinitely
 while True:
 
-    # accepts connection requests, conn is socket object for 
-    # user that is connecting, addr is IP address of user
-    conn, addr = server.accept()
-    clients.append(conn)
+    # accepts connection requests. clientSock is socket object for 
+    # connecting user, ip is IP address of connecting user
+    clientSock, ip = server.accept()
+    clientSockLst.append(clientSock)
 
     # notify server a client has connected
-    print(addr[0] + " connected")
+    print(ip[0] + " connected")
 
     # spin off thread for new connection
-    start_new_thread(clientthread, (conn, addr))
-
-conn.close()
-server.close()
+    start_new_thread(client_thread, (clientSock, ip))
 
 
 
