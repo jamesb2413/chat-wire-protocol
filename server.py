@@ -20,6 +20,7 @@ port = int(sys.argv[2])
 
 # bind server to IP_addr at port port
 server.bind((IP_addr, port))
+server.bind((IP_addr, port))
 
 # max 16 users connected to server at once
 server.listen(16)
