@@ -42,15 +42,11 @@ if existsBool:
     print("Please log in with your username and password.")
     username = input("Username: ")
     # TODO: Call server function to find username or notify user if username does not exist
-    password = input()
-    # TODO: Call server function to check password or notify user if password is incorrect
 # If user does not have account, sign up
 else:
     print("Please create your username and password.")
     newUsername = input("New Username: ")
     # TODO: Call server function to store username or notify user if username is taken
-    newPassword = input("New Password: ")
-    # TODO: Call server function to store password
 
 # Now, the user is logged in. Notify the user of possible functions.
 print("Congratulations! You have successfully logged in to your account.")
@@ -74,7 +70,7 @@ while True:
     for read_sock in read_socks: 
         # Incoming message
         if read_sock == s: 
-            message = read_sock.recv(2048) 
+            message = read_sock.recv(2048).decode()
             print(message) 
         # Input from user
         else: 
