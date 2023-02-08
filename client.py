@@ -32,7 +32,7 @@ while True:
     if existsInput == 'Y' or existsInput == 'y':
         existsBool = True
         break
-    elif existsInput == 'N' or existsInput == 'N':
+    elif existsInput == 'N' or existsInput == 'n':
         existsBool = False
         break
     else:
@@ -54,20 +54,19 @@ else:
 
 # Now, the user is logged in. Notify the user of possible functions.
 print("Congratulations! You have successfully logged in to your account.")
-# Wait for unread messages alert
-while True:
-    message = s.recv(2048).decode()
-    print(message)
-    break
 
 # Check: Will there be problems if a message arrives between login and beginning of while loop?
 print("If any messages arrive while you are logged in, they will be immediately displayed.")
-print("Use the following commands to interact with the chat app:")
+print("Use the following commands to interact with the chat app: \n")
 # if numMessages > 0:
     # print("R: Read new messages")
-print("L: List all accounts that exist on this server.")
-print("S: Send a message to another user.")
-print("D: Delete account.")
+print(" -----------------------------------------------")
+print("|L: List all accounts that exist on this server.|")
+print("|S: Send a message to another user.             |")
+print("|D: Delete account.                             |")
+print(" ----------------------------------------------- \n")
+
+# Unread msgs will display here
 
 # Wait for input from either client or server
 while True:
@@ -86,8 +85,9 @@ while True:
             command = sys.stdin.readline() 
             # print("command read: '", command, "'")
             # if command == ' S\n ' or command == ' s\n ':
-            
-            message = input("Type the message you would like to broadcast.")
-            s.send(message.encode())
+            send_to_user = input("Which user do you want to message? ")
+            message = input("Type the message you would like to send. ")
+            complete_msg = "Send " + send_to_user + " " + message
+            s.send(complete_msg.encode())
             print("Message sent.")  
 s.close() 
