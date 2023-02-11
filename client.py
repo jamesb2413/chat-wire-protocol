@@ -79,15 +79,39 @@ while True:
         if read_sock == s: 
             message = read_sock.recv(2048).decode()
             print(message) 
+            # TODO: close user connection, terminate program if server sends back that account was deleted
         # Input from user
         else: 
             # print("inside else")
-            command = sys.stdin.readline() 
+            command = sys.stdin.readline()
+            print("command: " + command)
+            command = command.strip()
             # print("command read: '", command, "'")
-            # if command == ' S\n ' or command == ' s\n ':
-            send_to_user = input("Which user do you want to message? ")
-            message = input("Type the message you would like to send. ")
-            complete_msg = "Send " + send_to_user + " " + message
-            s.send(complete_msg.encode())
-            print("Message sent.")  
+            if command == 'S' or command == 's':
+                send_to_user = input("Which user do you want to message? ")
+                message = input("Type the message you would like to send. ")
+                complete_msg = "Send " + send_to_user + " " + message
+                s.send(complete_msg.encode())
+                print("Message sent.")  
+            if command == 'L' or command == 'l':
+                complete_msg = "Userlist"
+                s.send(complete_msg.encode())
+                print("Fetching users... \n")
+            if command == 'D' or command == 'd':
+                delete = False
+                while True:
+                    deleteInput = input("Are you sure? Deleted accounts are permanently erased, and you will be logged off immediately. [Y/N] ")
+                    if deleteInput == 'Y' or deleteInput == 'y':
+                        delete = True
+                        break
+                    elif deleteInput == 'N' or deleteInput == 'n':
+                        delete = False
+                        break
+                    else:
+                        print("Invalid response. Please answer with 'Y' or 'N'.")
+                if delete:
+                    complete_msg = "Delete"
+                    s.send(complete_msg.encode())
+                    print("Deleting account... \n")
+
 s.close() 

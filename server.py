@@ -38,6 +38,7 @@ def signIn(message, clientSock):
     if message[1] == "Existing":
         try:
             thisUser = userDict[username]
+            # TODO: If user is already logged in, deny access
             print(thisUser)
         except:
             # TODO: Send message to user with username error
@@ -51,35 +52,68 @@ def signIn(message, clientSock):
         unreadAlert += msg + "\n\n"
     clientSock.sendall(unreadAlert.encode())
 
-def sendMsg(message, clientSock):
-    sender = ""
+def enqueueMsg(message, recipient):
+    userDict[recipient][2].append(message)
+
+
+def getClientUsername(clientSock):
     # get sender username
     # its not pretty but it works, refactor if possible
     for key in userDict.keys():
         if userDict[key][0] == clientSock:
-            sender = key
-            print("sender is " + sender) 
+            return key
+    print("CRITICAL ERROR: USER SENDING DOES NOT EXIST")
 
+def sendMsg(message, clientSock):
+    sender = getClientUsername(clientSock)
     recipient = message[1]
     raw_msg = " ".join(message[2:])
+
+    # Error handling message 
     error_handle = "Error sending message to " + recipient + ": "
+    
+    # Getting socket of user message was sent to
     try:
         recipientSock = userDict[recipient][0]
+        loggedIn = userDict[recipient][1]
     except:
         error_handle += "User does not exist"
         clientSock.sendall(error_handle.encode())
         return
 
+    # Send message to recipient
     try:
         payload = "From " + sender + ": " + raw_msg
         print("payload is: " + payload)
-        recipientSock.sendall(payload.encode())
+        # If user is logged in, send the message
+        if loggedIn:
+            recipientSock.sendall(payload.encode())
+        # If user is logged out, add to their queue
+        # NOTE Not sure if this works since no log out function yet to set 
+        # bool to false
+        else:
+            enqueueMsg(payload, recipient)
+            loggedOutMsg = "User " + recipient + " is currently offline. They will recieve your message when they next log in."
+            clientSock.sendall(loggedOutMsg.encode())
     except:
         recipient.close()
         remove(recipient)
         error_handle += "Recipient connection error"
         clientSock.sendall(error_handle.encode())
     return
+
+def sendUserlist(clientSock):
+    preamble = "Current users: \n\n"
+    for user in userDict.keys():
+        preamble += user + "\n"
+    clientSock.sendall(preamble.encode())
+
+def deleteAcct(clientSock):
+    toDelete = getClientUsername(clientSock)
+    userDict.pop(toDelete)
+    deleteConfirmation = "Account successfully deleted. Logging out..."
+    clientSock.sendall(deleteConfirmation.encode())
+    #TODO: Implement function which logs out user, closes out of program on client side
 
 
 def parse(message, clientSock):
@@ -89,6 +123,10 @@ def parse(message, clientSock):
         signIn(message, clientSock)
     elif operation == "Send":
         sendMsg(message, clientSock)
+    elif operation == "Userlist":
+        sendUserlist(clientSock)
+    elif operation == "Delete":
+        deleteAcct(clientSock)
     else:
         pass
 
