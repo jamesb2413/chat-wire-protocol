@@ -6,6 +6,7 @@ Resources:
 import socket
 import sys
 import select
+import time
 
 ip = ''
 port = -1
@@ -21,6 +22,7 @@ else:
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 # connect to the server at the given IP address and port
 s.connect((ip, port))
+socks_list = [sys.stdin, s] 
 # TODO: Add exception handling
 
 print("Congratulations! You have connected to the chat server.")
@@ -28,7 +30,7 @@ print("Congratulations! You have connected to the chat server.")
 # Determine if user has account or needs to sign up
 existsBool = False
 while True:
-    existsInput = input("Do you already have an account? [Y/N]")
+    existsInput = input("Do you already have an account? [Y/N] ")
     if existsInput == 'Y' or existsInput == 'y':
         existsBool = True
         break
@@ -39,24 +41,43 @@ while True:
         print("Invalid response. Please answer with 'Y' or 'N'.")
 # If user has account, log in
 if existsBool:
-    print("Please log in with your username and password.")
-    username = input("Username: ")
-    message = "Signin Existing " + username
-    s.send(message.encode())
+    # TODO: Give user a way to go back and create new account
+    while True:
+        print("Please log in with your username and password.")
+        username = input("Username: ")
+        message = "Signin Existing " + username
+        s.send(message.encode())
+        time.sleep(0.1)
+        # Catch errors: (1) account does not exist, (2) account already logged in elsewhere
+        read_socks, _, _ = select.select(socks_list,[],[]) 
+        if len(read_socks) > 0: 
+            # Error message from server
+            message = read_socks[0].recv(2048).decode()
+            print(message) 
+        else:
+            break 
 # If user does not have account, sign up
 else:
-    # Watch out for usernames that already exist
-    print("Please create your username and password.")
-    newUsername = input("New Username: ")
-    message = "Signin New " + newUsername
-    s.send(message.encode())
-
+    while True:
+        print("\nPlease create a new username.")
+        newUsername = input("New Username: ")
+        message = "Signin New " + newUsername
+        s.send(message.encode())
+        time.sleep(0.1)
+        # Catch errors: username already in use by a different account
+        read_socks, _, _ = select.select(socks_list,[],[]) 
+        if len(read_socks) > 0: 
+            # Error message from server
+            message = read_socks[0].recv(2048).decode()
+            print(message) 
+        else:
+            break 
 
 # Now, the user is logged in. Notify the user of possible functions.
-print("Congratulations! You have successfully logged in to your account.")
+print("\nCongratulations! You have successfully logged in to your account.\n")
 
 # Check: Will there be problems if a message arrives between login and beginning of while loop?
-print("If any messages arrive while you are logged in, they will be immediately displayed.")
+print("If any messages arrive while you are logged in, they will be immediately displayed.\n")
 print("Use the following commands to interact with the chat app: \n")
 # if numMessages > 0:
     # print("R: Read new messages")
@@ -70,8 +91,6 @@ print(" ----------------------------------------------- \n")
 
 # Wait for input from either client or server
 while True:
-    socks_list = [sys.stdin, s] 
-
     read_socks, _, _ = select.select(socks_list,[],[]) 
 
     for read_sock in read_socks: 

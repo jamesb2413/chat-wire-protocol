@@ -24,34 +24,57 @@ server.bind((IP_addr, port))
 # max 16 users connected to server at once
 server.listen(16)
 clientSockLst = []
+# Map of existing users and their messages
+# { socketObj : [username, loggedOnBool, messageQueue ] }
 userDict = {}
 
+## Key app functionality
+# Create new account
 def addUser(username, clientSock):
     #TODO: make sure username doesn't already exist
+    if username in userDict:
+        collideAlert = ("\nThis username is already taken by another account. Please " 
+                        "try again with a different username.\n")
+        clientSock.sendall(collideAlert.encode())
+        return
     userDict[username] = [clientSock, True, []]
     return userDict[username]
 
+# Sign in to existing account OR create new account via call to addUser
 def signIn(message, clientSock):
-    # Sign in / create account
     thisUser = []
     username = message[2]
     if message[1] == "Existing":
         try:
             thisUser = userDict[username]
-            # TODO: If user is already logged in, deny access
-            print(thisUser)
+            # If user is already logged in, deny access
+            if thisUser[1] == True:
+                doubleLogAlert = ("\nThis user is already logged in on another device. Please " 
+                                  "log out in the other location and try again.\n")
+                clientSock.sendall(doubleLogAlert.encode())
+                return
         except:
-            # TODO: Send message to user with username error
-            pass
+            # If account does not exist
+            dneAlert = ("\nNo users exist with this username. Please double check you that typed correctly "
+                        "or create a new account with this username.\n")
+            clientSock.sendall(dneAlert.encode())
+            return
+    # Create new user with input username
     else:
+        # TODO: Make sure username is valid, i.e. at least one non-whitespace character
         thisUser = addUser(username, clientSock)
-    unreads = userDict[username][2]
-    unreadNum = str(len(unreads))
-    unreadAlert = "<<ALERT>> You have " + unreadNum + " unread messages:\n\n"
-    for msg in unreads:
-        unreadAlert += msg + "\n\n"
-    clientSock.sendall(unreadAlert.encode())
+        # Handle collisions
+        if thisUser is None:
+            return
+    # TODO: Change this to not conflict with create acct errors
+    # unreads = userDict[username][2]
+    # unreadNum = str(len(unreads))
+    # unreadAlert = "You have " + unreadNum + " unread messages:\n\n"
+    # for msg in unreads:
+    #     unreadAlert += msg + "\n\n"
+    # clientSock.sendall(unreadAlert.encode())
 
+# Store messages while user is logged off
 def enqueueMsg(message, recipient):
     userDict[recipient][2].append(message)
 
@@ -59,6 +82,7 @@ def enqueueMsg(message, recipient):
 def getClientUsername(clientSock):
     # get sender username
     # its not pretty but it works, refactor if possible
+    # Alternative is to use clientSock as key so this lookup is O(1)
     for key in userDict.keys():
         if userDict[key][0] == clientSock:
             return key
