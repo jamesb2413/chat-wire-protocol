@@ -33,7 +33,7 @@ userDict = {}
 def addUser(username, clientSock):
     #TODO: make sure username doesn't already exist
     if username in userDict:
-        collideAlert = ("\nThis username is already taken by another account. Please " 
+        collideAlert = ("Signin This username is already taken by another account. Please " 
                         "try again with a different username.\n")
         clientSock.sendall(collideAlert.encode())
         return
@@ -49,13 +49,13 @@ def signIn(message, clientSock):
             thisUser = userDict[username]
             # If user is already logged in, deny access
             if thisUser[1] == True:
-                doubleLogAlert = ("\nThis user is already logged in on another device. Please " 
+                doubleLogAlert = ("Signin This user is already logged in on another device. Please " 
                                   "log out in the other location and try again.\n")
                 clientSock.sendall(doubleLogAlert.encode())
                 return
         except:
             # If account does not exist
-            dneAlert = ("\nNo users exist with this username. Please double check you that typed correctly "
+            dneAlert = ("Signin No users exist with this username. Please double check that you typed correctly "
                         "or create a new account with this username.\n")
             clientSock.sendall(dneAlert.encode())
             return
@@ -67,12 +67,12 @@ def signIn(message, clientSock):
         if thisUser is None:
             return
     # TODO: Change this to not conflict with create acct errors
-    # unreads = userDict[username][2]
-    # unreadNum = str(len(unreads))
-    # unreadAlert = "You have " + unreadNum + " unread messages:\n\n"
-    # for msg in unreads:
-    #     unreadAlert += msg + "\n\n"
-    # clientSock.sendall(unreadAlert.encode())
+    unreads = userDict[username][2]
+    unreadNum = str(len(unreads))
+    unreadAlert = "You have " + unreadNum + " unread messages:\n\n"
+    for msg in unreads:
+        unreadAlert += msg + "\n\n"
+    clientSock.sendall(unreadAlert.encode())
 
 # Store messages while user is logged off
 def enqueueMsg(message, recipient):
