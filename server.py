@@ -39,6 +39,13 @@ def signIn(message, clientSock):
         invalidMsg = "S This username is invalid. Please try again with a different username.\n"
         clientSock.sendall(invalidMsg.encode())
         return
+
+    # If user inputs more than one word
+    if len(message) > 3:
+        oneWordMsg = "S Your username can only be one word. Please try again."
+        clientSock.sendall(oneWordMsg.encode())
+        return
+
     if message[1] == "Existing":
         try:
             thisUser = userDict[username]
