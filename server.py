@@ -31,7 +31,14 @@ def addUser(username, clientSock):
 # Sign in to existing account OR create new account via call to addUser
 def signIn(message, clientSock):
     thisUser = []
-    username = message[2]
+    try:
+        username = message[2]
+    except:
+        print("2")
+        # If user inputs ' ' as username
+        invalidMsg = "S This username is invalid. Please try again with a different username.\n"
+        clientSock.sendall(invalidMsg.encode())
+        return
     if message[1] == "Existing":
         try:
             thisUser = userDict[username]

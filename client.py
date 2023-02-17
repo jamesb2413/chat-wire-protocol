@@ -67,8 +67,6 @@ def signinLoops(existsBool):
                 print("\nCongratulations! You have successfully logged in to your account.\n")
                 print(messageSplit[0] + ' ' + messageSplit[1])
                 return
-            else:
-                return
         signinLoops(existsBool)
 
 # Parse input from either command line or server and do the correct action
@@ -146,7 +144,6 @@ while True:
             print("Invalid response. Please answer with 'Y' or 'N'.")
             
     signinLoops(existsBool)
-
 
     # Now, the user is logged in. Notify the user of possible functions
     # Check: Will there be problems if a message arrives between login and beginning of while loop?
