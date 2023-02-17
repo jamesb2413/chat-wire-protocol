@@ -68,24 +68,30 @@ def signIn(message, clientSock):
 def sendMsg(message, clientSock):
     sender = getClientUsername(clientSock)
     recipient = message[1]
-    raw_msg = " ".join(message[2:])
 
     # Error handling message 
     error_handle = "Error sending message to " + recipient + ": "
-    
+
+    if recipient == sender:
+        error_handle += "Cannot send message to self\n"
+        clientSock.sendall(error_handle.encode())
+        return
+
+    raw_msg = " ".join(message[2:])
+
     # Getting socket of user message was sent to
     try:
         recipientSock = userDict[recipient][0]
         loggedIn = userDict[recipient][1]
-        print("loggedIN: ", loggedIn)
     except:
-        error_handle += "User does not exist"
+        error_handle += "User does not exist\n"
         clientSock.sendall(error_handle.encode())
         return
 
     # Send message to recipient
     try:
         payload = "\nFrom " + sender + ": " + raw_msg + "\n"
+        senderNote = "Message sent.\n"
         print("payload is: " + payload)
         # If user is logged in, send the message
         if loggedIn:
@@ -95,6 +101,7 @@ def sendMsg(message, clientSock):
         # bool to false
         else:
             enqueueMsg(payload, recipient)
+        clientSock.sendall(senderNote.encode())
     except:
         recipient.close()
         remove(recipient)

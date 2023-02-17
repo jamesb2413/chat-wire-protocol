@@ -88,12 +88,10 @@ def messageLoop():
             command = command.strip()
             if command == 'S' or command == 's':
                 # TODO: Make sure send_to_user is a valid username
-                send_to_user = input("Which user do you want to message? \n Recipient Username: ")
+                send_to_user = input("Which user do you want to message? \n Recipient username: ")
                 message = input("Type the message you would like to send. \n Message: ")
                 complete_msg = "S " + send_to_user + " " + message
                 s.send(complete_msg.encode())
-                print("Message sent.\n")  
-                print("Command: ")
             if command == 'L' or command == 'l':
                 complete_msg = "L"
                 s.send(complete_msg.encode())
