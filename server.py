@@ -97,7 +97,6 @@ def signIn(message, clientSock):
         # Handle collisions
         if thisUser is None:
             return
-    # TODO: Change this to not conflict with create acct errors
     unreads = userDict[username][2]
     unreadNum = str(len(unreads))
     unreadAlert = "You have " + unreadNum + " unread messages:\n\n"
@@ -150,10 +149,28 @@ def sendMsg(message, clientSock):
         clientSock.sendall(error_handle.encode())
     return
 
-def sendUserlist(clientSock):
+def sendUserlist(message, clientSock):
+    wildcard = message[1]
+    # print("wildcard: ", wildcard)
+    matches = list(userDict.keys())
+    starBool = False
+    lastInd = 0
+    for ind, c in enumerate(wildcard):
+        if c == "*":
+            starBool = True
+            break
+        for username in matches:
+            if username[ind] != c:
+                matches.remove(username)
+        lastInd = ind
+    # Remove usernames with extra chars
+    if not starBool:
+        for username in matches:
+            if len(username) > lastInd + 1:
+                matches.remove(username)
     userListMsg = "---------------\n"
-    userListMsg += "Current users: \n"
-    for user in userDict.keys():
+    userListMsg += "Matching users: \n"
+    for user in matches:
         userListMsg += user + "\n"
     userListMsg += "---------------\n"
     clientSock.sendall(userListMsg.encode())
@@ -176,7 +193,7 @@ def parse(message, clientSock):
     elif operation == "S":
         sendMsg(message, clientSock)
     elif operation == "L":
-        sendUserlist(clientSock)
+        sendUserlist(message, clientSock)
     elif operation == "D":
         deleteAcct(clientSock)
     elif operation == "O":

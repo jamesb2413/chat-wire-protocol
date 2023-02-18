@@ -105,7 +105,11 @@ def messageLoop():
                 complete_msg = "S " + send_to_user + " " + message
                 s.send(complete_msg.encode())
             if command == 'L' or command == 'l':
-                complete_msg = "L"
+                complete_msg = "L "
+                wildcard = input("Optional text wildcard: ")
+                if wildcard == "":
+                    wildcard = "*"
+                complete_msg += wildcard
                 s.send(complete_msg.encode())
                 print("Fetching users... \n")
             if command == 'D' or command == 'd':
