@@ -147,7 +147,6 @@ def messageLoop():
 # Loop indefinitely so user can start over after logging out.
 while True: 
     signinLoop()
-
     # Now, the user is logged in. Notify the user of possible functions
     # Check: Will there be problems if a message arrives between login and beginning of while loop?
     print("If any messages arrive while you are logged in, they will be immediately displayed.\n")

@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+// Interface exported by the server.
+service Chat {
+    // A simple RPC.
+    //
+    // Signs in and gets unread messages.
+    rpc SignInExisting(Username) returns (Unreads) {}
+    rpc SignInNew(Username) returns (Unreads) {}
+    // Sends message to recipient with Username
+    rpc Send(Username, SendMessage) 
