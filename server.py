@@ -3,6 +3,29 @@ import select
 import sys
 from _thread import *
 
+## Chat functionality
+# Create socket object
+server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+# Set socket to reuse address
+server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+
+# Checks for correct number of args
+if len(sys.argv) != 3:
+    print("Correct usage: script, IP address, port number")
+    exit()
+ip_addr = str(sys.argv[1])
+port = int(sys.argv[2])
+
+server.bind((ip_addr, port))
+
+# Max 16 users connected to server at once
+server.listen(16)
+# List of connected sockets
+clientSockLst = []
+# Map of existing users and their messages { username : [socketObj, loggedOnBool, messageQueue ] }
+userDict = {}
+
 ## Helper functions
 # Store messages while user is logged off
 def enqueueMsg(message, recipient):
@@ -10,6 +33,9 @@ def enqueueMsg(message, recipient):
 
 # Get username from client socket object
 def getClientUsername(clientSock):
+    print("----------")
+    print("getClientUsername clientSock: ", clientSock)
+    print("----------")
     for key in userDict.keys():
         if userDict[key][0] == clientSock:
             return key
@@ -57,6 +83,7 @@ def signIn(message, clientSock):
                 return
             else:
                 thisUser[1] = True
+                thisUser[0] = clientSock
         except:
             # If account does not exist
             dneAlert = ("S No users exist with this username. Please double check that you typed correctly "
@@ -157,34 +184,12 @@ def parse(message, clientSock):
     else:
         pass
 
-
-## Chat functionality
-# Create socket object
-server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-# Set socket to reuse address
-server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-
-# Checks for correct number of args
-if len(sys.argv) != 3:
-    print("Correct usage: script, IP address, port number")
-    exit()
-ip_addr = str(sys.argv[1])
-port = int(sys.argv[2])
-
-server.bind((ip_addr, port))
-
-# Max 16 users connected to server at once
-server.listen(16)
-# List of connected sockets
-clientSockLst = []
-# Map of existing users and their messages { socketObj : [username, loggedOnBool, messageQueue ] }
-userDict = {}
-
+## Chat loops
 # Listens for messages from this client and parses to perform necessary functions
 def client_thread(clientSock, ip):
     # Server listens indefinitely
     while True:
+        # print('inside thread: ', clientSock)
         try:
             # Get message from client, max length 280 chars
             message = clientSock.recv(280).decode()
@@ -199,12 +204,15 @@ def client_thread(clientSock, ip):
             
             # Message has no content, remove connection
             else:
+                logOut(clientSock)
                 remove(clientSock)
+                return
         except:
             continue
 
 # removes specified client from chat
-def remove(client):
+def remove(clientSock):
+    print("removed!")
     if clientSock in clientSockLst:
         clientSockLst.remove(clientSock)
 
@@ -218,7 +226,9 @@ while True:
     print(ip[0] + " connected")
 
     start_new_thread(client_thread, (clientSock, ip))
-
+    print('clientSockLst: \n')
+    for clientSock in clientSockLst:
+        print(clientSock, "\n")
 
 
 
