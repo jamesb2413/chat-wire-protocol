@@ -17,15 +17,29 @@ if len(sys.argv) != 3:
 else:
     ip = str(sys.argv[1]) 
     port = int(sys.argv[2]) 
-
 # create an INET, STREAMing socket
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 # connect to the server at the given IP address and port
 s.connect((ip, port))
 socks_list = [sys.stdin, s] 
 read_socks = []
-# TODO: Add exception handling
-def signinLoops(existsBool):
+
+print("Congratulations! You have connected to the chat server.\n")
+
+def signinLoop():
+    print("Sign In: ")
+    # Determine if user has account or needs to sign up
+    existsBool = False
+    while True:
+        existsInput = input("Do you already have an account? [Y/N] ")
+        if existsInput == 'Y' or existsInput == 'y':
+            existsBool = True
+            break
+        elif existsInput == 'N' or existsInput == 'n':
+            existsBool = False
+            break
+        else:
+            print("Invalid response. Please answer with 'Y' or 'N'.")
     if existsBool:
         print("Please log in with your username and password.")
         username = input("Username: ")
@@ -47,7 +61,7 @@ def signinLoops(existsBool):
                 return
             else:
                 return
-        signinLoops(existsBool)
+        signinLoop()
     else:
         print("\nPlease create a new username.")
         newUsername = input("New Username: ")
@@ -67,7 +81,7 @@ def signinLoops(existsBool):
                 print("\nCongratulations! You have successfully logged in to your account.\n")
                 print(messageSplit[0] + ' ' + messageSplit[1])
                 return
-        signinLoops(existsBool)
+        signinLoop()
 
 # Parse input from either command line or server and do the correct action
 def messageLoop():
@@ -126,24 +140,9 @@ def messageLoop():
                 return
     messageLoop()
 
-print("Congratulations! You have connected to the chat server.\n")
 # Loop indefinitely so user can start over after logging out.
-while True:
-    print("Sign In: ")
-    # Determine if user has account or needs to sign up
-    existsBool = False
-    while True:
-        existsInput = input("Do you already have an account? [Y/N] ")
-        if existsInput == 'Y' or existsInput == 'y':
-            existsBool = True
-            break
-        elif existsInput == 'N' or existsInput == 'n':
-            existsBool = False
-            break
-        else:
-            print("Invalid response. Please answer with 'Y' or 'N'.")
-            
-    signinLoops(existsBool)
+while True: 
+    signinLoop()
 
     # Now, the user is logged in. Notify the user of possible functions
     # Check: Will there be problems if a message arrives between login and beginning of while loop?
