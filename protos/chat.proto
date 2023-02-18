@@ -1,5 +1,7 @@
 syntax = "proto3";
 
+package chat;
+
 // Interface exported by the server.
 service Chat {
     // A simple RPC.
@@ -8,4 +10,20 @@ service Chat {
     rpc SignInExisting(Username) returns (Unreads) {}
     rpc SignInNew(Username) returns (Unreads) {}
     // Sends message to recipient with Username
-    rpc Send(Username, SendMessage) 
+    rpc Send(Username, SendMessage) returns (SenderNote) {}
+    rpc List(Wildcard) returns ()
+}
+
+message Username {
+    string name = 1;
+}
+
+message Unreads {
+    
+}
+
+// The response message
+message SenderNote {
+    string message = 1;
+}
+
