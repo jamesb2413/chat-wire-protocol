@@ -58,9 +58,9 @@ def signinLoop():
             else: 
                 assert(messageSplit[0] == "You")
                 print("\nCongratulations! You have successfully logged in to your account.\n")
-                print(messageSplit[0] + ' ' + messageSplit[1])
+                print(message)
                 return username
-    signinLoop()
+    return signinLoop()
 
 # Parse input from either command line or server and do the correct action
 def messageLoop(username):

@@ -173,8 +173,6 @@ def sendUserlist(message, clientSock, clientDict):
                     matches.remove(u)
                 else:
                     uAfterStar = u[-len(afterStar):]
-                    print(afterStar)
-                    print(uAfterStar)
                     if afterStar != uAfterStar:
                         matches.remove(u)
         
