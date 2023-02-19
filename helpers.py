@@ -27,13 +27,6 @@ def enqueueMsg(message, recipient, clientDict):
     clientDict[recipient][2].append(message)
     return clientDict[recipient][2][-1]
 
-# Get username from client socket object
-def getClientUsername(clientSock, clientDict):
-    for key in clientDict.keys():
-        if clientDict[key][0] == clientSock:
-            return key
-    return "None"
-
 def addUser(username, clientSock, clientDict):
     # If username is already taken, notify user and request new username
     if username in clientDict:
@@ -176,10 +169,15 @@ def sendUserlist(message, clientSock, clientDict):
             # Chars after star must match exactly.
             if starIdx < len(wildcard) - 1:
                 afterStar = wildcard[starIdx + 1:]
-                uAfterStar = u[-len(afterStar):]
-                if afterStar != uAfterStar:
+                if len(u) < len(afterStar):
                     matches.remove(u)
-    
+                else:
+                    uAfterStar = u[-len(afterStar):]
+                    print(afterStar)
+                    print(uAfterStar)
+                    if afterStar != uAfterStar:
+                        matches.remove(u)
+        
     # return list of specific user
     else:
         matches = []

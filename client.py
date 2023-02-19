@@ -41,7 +41,7 @@ def signinLoop():
     # Username error check
     if helpers.isValidUsername(username):
         # Remove whitespace
-        username = username.split()[0].lower()
+        username = username.strip().lower()
         message += username
         s.send(message.encode())
         time.sleep(0.1)
