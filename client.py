@@ -42,7 +42,7 @@ def signinLoop():
     # Username error check
     if helpers.isValidUsername(username):
         # Remove whitespace
-        username = username.split()[0]
+        username = username.split()[0].lower()
         message += username
         s.send(message.encode())
         time.sleep(0.1)
@@ -114,20 +114,19 @@ def messageLoop(username):
                     complete_msg = "D " + username
                     s.send(complete_msg.encode())
                     print("Deleting account... \n")
-                    time.sleep(0.5)
+                    time.sleep(0.2)
                     print("Goodbye!\n")
-                    time.sleep(0.5)
+                    time.sleep(0.2)
                     return
                 else:
                     print("\nCommand: ")
             if command == 'O' or command == 'o':
                 complete_msg = "O " + username
-                print("complete_msg: ", complete_msg)
                 s.send(complete_msg.encode())
                 print("Logging out...")
-                time.sleep(0.5)
+                time.sleep(0.2)
                 print("Goodbye!\n")
-                time.sleep(0.5)
+                time.sleep(0.2)
                 return
     messageLoop(username)
 

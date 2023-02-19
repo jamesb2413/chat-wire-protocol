@@ -52,7 +52,7 @@ def addUser(username, clientSock, clientDict):
 def signIn(message, clientSock, clientDict):
     # Catching username errors
     try:
-        username = message[2]
+        username = message[2].lower()
     except:
         print("Critical Signin Error")
         return -1
@@ -158,8 +158,8 @@ def sendMsg(message, clientSock, clientDict):
         return -3
     
 def sendUserlist(message, clientSock, clientDict):
-    wildcard = message[1]
-    matches, res = list(clientDict.keys()), list(clientDict.keys())
+    wildcard = message[1].lower()
+    allUsers, matches = list(clientDict.keys()), list(clientDict.keys())
 
     # return list of all users
     if wildcard == "":
@@ -168,28 +168,36 @@ def sendUserlist(message, clientSock, clientDict):
     # return list of qualifying users
     elif "*" in wildcard:
         starIdx = wildcard.find("*")
-        for u in matches:
+        for u in allUsers:
+            # Chars before star (if any) must match exactly
             if u[0:starIdx] != wildcard[0:starIdx]:
-                res.remove(u)
+                matches.remove(u)
+            # Any number of chars match star. 
+            # Chars after star must match exactly.
+            if starIdx < len(wildcard) - 1:
+                afterStar = wildcard[starIdx + 1:]
+                uAfterStar = u[-len(afterStar):]
+                if afterStar != uAfterStar:
+                    matches.remove(u)
     
     # return list of specific user
     else:
-        res = []
-        for u in matches:
+        matches = []
+        for u in allUsers:
             if u == wildcard:
-                res.append(u)
+                matches.append(u)
 
     # build formatted message for client
     userListMsg = "---------------\n"
     userListMsg += "Matching users: \n"
-    for user in res:
+    for user in matches:
         userListMsg += user + "\n"
     userListMsg += "---------------\n"
     try:
         clientSock.sendall(userListMsg.encode())
     except:
         pass
-    return res
+    return matches
 
 def deleteAcct(message, clientDict):
     toDelete = message[1]
