@@ -28,6 +28,7 @@ read_socks = []
 print("Congratulations! You have connected to the chat server.\n")
 username = ""
 
+# Loops requesting user input until a valid sign in. Returns valid username
 def signinLoop():
     existsBool = helpers.existingOrNew()
     if existsBool:
@@ -39,33 +40,31 @@ def signinLoop():
         username = input("New Username: ")
         message = "I New "
     # Username error check
-    if not helpers.isValidUsername(username):
-        signinLoop()
-    # Remove whitespace
-    username = username.split()[0]
-    message += username
-    s.send(message.encode())
-    time.sleep(0.1)
-    # Catch errors: Existing: (1) account does not exist, (2) account already logged in elsewhere
-    # New: Username already in use by a different account
-    read_socks, _, _ = select.select(socks_list,[],[]) 
-    for read_sock in read_socks: 
-        message = read_sock.recv(2048).decode()
-        messageSplit = message.split(' ', 1)
-        # Error message from server
-        if messageSplit[0] == "I":
-            print(messageSplit[1])
-        # Unread messages
-        elif messageSplit[0] == "You":
-            print("\nCongratulations! You have successfully logged in to your account.\n")
-            print(messageSplit[0] + ' ' + messageSplit[1])
-            return
-        else:
-            return
+    if helpers.isValidUsername(username):
+        # Remove whitespace
+        username = username.split()[0]
+        message += username
+        s.send(message.encode())
+        time.sleep(0.1)
+        # Catch errors: Existing: (1) account does not exist, (2) account already logged in elsewhere
+        # New: Username already in use by a different account
+        read_socks, _, _ = select.select(socks_list,[],[]) 
+        for read_sock in read_socks: 
+            message = read_sock.recv(2048).decode()
+            messageSplit = message.split(' ', 1)
+            # Error message from server
+            if messageSplit[0] == "I":
+                print(messageSplit[1])
+            # Unread messages
+            else: 
+                assert(messageSplit[0] == "You")
+                print("\nCongratulations! You have successfully logged in to your account.\n")
+                print(messageSplit[0] + ' ' + messageSplit[1])
+                return username
     signinLoop()
 
 # Parse input from either command line or server and do the correct action
-def messageLoop():
+def messageLoop(username):
     read_socks, _, _ = select.select(socks_list,[],[]) 
 
     for read_sock in read_socks: 
@@ -99,19 +98,20 @@ def messageLoop():
                 s.send(complete_msg.encode())
                 print("Fetching users... \n")
             if command == 'D' or command == 'd':
-                delete = False
-                deleteInput = input("Are you sure? Deleted accounts are permanently erased, and you will be logged off immediately. [Y/N] ")
+                confirm = False
+                confirmInput = input("Are you sure? Deleted accounts are permanently erased, "
+                                    "and you will be logged off immediately. [Y/N] ")
                 while True:
-                    if deleteInput == 'Y' or deleteInput == 'y':
-                        delete = True
+                    if confirmInput == 'Y' or confirmInput == 'y':
+                        confirm = True
                         break
-                    elif deleteInput == 'N' or deleteInput == 'n':
-                        delete = False
+                    elif confirmInput == 'N' or confirmInput == 'n':
+                        confirm = False
                         break
                     else:
                         print("Invalid response. Please answer with 'Y' or 'N'.")
-                if delete:
-                    complete_msg = "D"
+                if confirm:
+                    complete_msg = "D " + username
                     s.send(complete_msg.encode())
                     print("Deleting account... \n")
                     time.sleep(0.5)
@@ -121,7 +121,8 @@ def messageLoop():
                 else:
                     print("\nCommand: ")
             if command == 'O' or command == 'o':
-                complete_msg = "O"
+                complete_msg = "O " + username
+                print("complete_msg: ", complete_msg)
                 s.send(complete_msg.encode())
                 print("Logging out...")
                 time.sleep(0.5)
@@ -132,7 +133,7 @@ def messageLoop():
 
 # Loop indefinitely so user can start over after logging out.
 while True: 
-    signinLoop()
+    username = signinLoop()
     # Now, the user is logged in. Notify the user of possible functions
     # Check: Will there be problems if a message arrives between login and beginning of while loop?
     print("If any messages arrive while you are logged in, they will be immediately displayed.\n")
@@ -147,4 +148,4 @@ while True:
     print(" ----------------------------------------------- \n")
     print("Command: ")
     # Wait for input from either command line or server
-    messageLoop()
+    messageLoop(username)

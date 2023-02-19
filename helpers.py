@@ -1,3 +1,28 @@
+## Used in client
+# TODO: Unit test
+def isValidUsername(username):
+    usernameWords = username.split()
+    # If user inputs empty string, whitespace, or multiple words as username
+    if len(usernameWords) != 1:
+        print("Usernames can only be one word containing letters, numbers, and special characters. " 
+              "Please try again with a different username.\n")
+        return False
+    return True
+
+def existingOrNew():
+    print("Sign In: ")
+    # Determine if user has account or needs to sign up
+    existsInput = input("Do you already have an account? [Y/N] ")
+    if existsInput == 'Y' or existsInput == 'y':
+        return True
+    elif existsInput == 'N' or existsInput == 'n':
+        return False
+    else:
+        print("Invalid response. Please answer with 'Y' or 'N'.")
+        return existingOrNew()
+
+
+## Used in server
 def enqueueMsg(message, recipient, clientDict):
     clientDict[recipient][2].append(message)
     return clientDict[recipient][2][-1]
@@ -22,28 +47,6 @@ def addUser(username, clientSock, clientDict):
     # If username is valid, create new user in userDict
     clientDict[username] = [clientSock, True, []]
     return clientDict[username]
-
-# TODO: Unit test
-def isValidUsername(username):
-    usernameWords = username.split()
-    # If user inputs empty string, whitespace, or multiple words as username
-    if len(usernameWords) != 1:
-        print("Usernames can only be one word containing letters, numbers, and special characters. " 
-              "Please try again with a different username.\n")
-        return False
-    return True
-
-def existingOrNew():
-    print("Sign In: ")
-    # Determine if user has account or needs to sign up
-    existsInput = input("Do you already have an account? [Y/N] ")
-    if existsInput == 'Y' or existsInput == 'y':
-        return True
-    elif existsInput == 'N' or existsInput == 'n':
-        return False
-    else:
-        print("Invalid response. Please answer with 'Y' or 'N'.")
-        return existingOrNew()
     
 # Sign in to existing account OR create new account via call to addUser
 def signIn(message, clientSock, clientDict):
@@ -98,7 +101,6 @@ def signIn(message, clientSock, clientDict):
         clientSock.sendall(unreadAlert.encode())
     except:
         pass
-    print("clientDict: ", clientDict)
     return 1
 
 def sendMsg(message, clientSock, clientDict):
@@ -124,9 +126,10 @@ def sendMsg(message, clientSock, clientDict):
 
     # Send message to recipient
     try:
-        payload = "\nFrom " + sender + ": " + raw_msg + "\n"
-        senderNote = "Message sent.\n"
-        print("payload is: " + payload)
+        # Debugging messages for server
+        # payload = "\nFrom " + sender + ": " + raw_msg + "\n"
+        # print("payload is: " + payload)
+
         # If user is logged in, send the message
         if loggedIn:
             try:
@@ -134,17 +137,19 @@ def sendMsg(message, clientSock, clientDict):
             except:
                 pass
         # If user is logged out, add to their queue
-        # NOTE Not sure if this works since no log out function yet to set 
-        # bool to false
         else:
             enqueueMsg(payload, recipient, clientDict)
+        
+        # Notify sender that message has been sent.
+        senderNote = "Message sent.\n"
         try:
             clientSock.sendall(senderNote.encode())
         except:
             pass
+
         return 1
+
     except:
-        recipient.close()
         error_handle += "Recipient connection error"
         try:
             clientSock.sendall(error_handle.encode())
@@ -186,12 +191,12 @@ def sendUserlist(message, clientSock, clientDict):
         pass
     return res
 
-def deleteAcct(clientSock, clientDict):
-    toDelete = getClientUsername(clientSock, clientDict)
+def deleteAcct(message, clientDict):
+    toDelete = message[1]
     clientDict.pop(toDelete)
     return toDelete
 
-def logOut(clientSock, clientDict):
-    toLogOut = getClientUsername(clientSock, clientDict)
+def logOut(message, clientDict):
+    toLogOut = message[1]
     clientDict[toLogOut][1] = False
     return toLogOut

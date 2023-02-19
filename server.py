@@ -38,9 +38,9 @@ def parse(message, clientSock):
     elif operation == "L":
         helpers.sendUserlist(message, clientSock, clientDict)
     elif operation == "D":
-        helpers.deleteAcct(clientSock, clientDict)
+        helpers.deleteAcct(message, clientDict)
     elif operation == "O":
-        helpers.logOut(clientSock, clientDict)
+        helpers.logOut(message, clientDict)
     else:
         pass
 
