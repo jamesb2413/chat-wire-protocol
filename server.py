@@ -24,23 +24,23 @@ server.bind((ip_addr, port))
 server.listen(16)
 # List of connected sockets
 clientSockLst = []
-# Map of existing users and their messages { username : [socketObj, loggedOnBool, messageQueue ] }
-userDict = {}
+# Map of existing users and their messages { username : [socketObj, loggedOnBool, messageQueue] }
+clientDict = {}
 
 # Parse message according to wire protocol to determine which function to call
 def parse(message, clientSock):
     message = message.split()
     operation = message[0]
     if operation == "I":
-        helpers.signIn(message, clientSock, userDict)
+        helpers.signIn(message, clientSock, clientDict)
     elif operation == "S":
-        helpers.sendMsg(message, clientSock, userDict)
+        helpers.sendMsg(message, clientSock, clientDict)
     elif operation == "L":
-        helpers.sendUserlist(message, clientSock, userDict)
+        helpers.sendUserlist(message, clientSock, clientDict)
     elif operation == "D":
-        helpers.deleteAcct(clientSock, userDict)
+        helpers.deleteAcct(clientSock, clientDict)
     elif operation == "O":
-        helpers.logOut(clientSock, userDict)
+        helpers.logOut(clientSock, clientDict)
     else:
         pass
 
@@ -62,8 +62,8 @@ def client_thread(clientSock, ip):
             
             # Message has no content, remove connection
             else:
-                if helpers.getClientUsername(clientSock, userDict) != "None":
-                    helpers.logOut(clientSock, userDict)
+                if helpers.getClientUsername(clientSock, clientDict) != "None":
+                    helpers.logOut(clientSock, clientDict)
                 remove(clientSock)
                 return
         except:

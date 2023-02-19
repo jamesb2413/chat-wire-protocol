@@ -13,7 +13,7 @@ class Chat(chat_pb2_grpc.ChatServicer):
         self.clientDict = {}
 
     def SignInExisting(self, username, context):
-        userAttributes = []
+        helpers_gRPC.signIn(username, self.clientDict)
 
     def SayHello(self, request, context):
         return helloworld_pb2.HelloReply(message='Hello, %s!' % request.name)

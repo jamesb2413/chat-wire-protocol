@@ -16,7 +16,7 @@ service Chat {
 }
 
 message Username {
-    string name = 1;
+    required string name = 1;
 }
 
 message UnreadsOrError {

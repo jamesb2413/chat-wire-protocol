@@ -7,6 +7,7 @@ import socket
 import sys
 import select
 import time
+import helpers
 
 ip = ''
 port = -1
@@ -43,6 +44,7 @@ def signinLoop():
     if existsBool:
         print("Please log in with your username")
         username = input("Username: ")
+        
         message = "I Existing " + username
         s.send(message.encode())
         time.sleep(0.1)
