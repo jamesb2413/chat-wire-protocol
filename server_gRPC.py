@@ -9,6 +9,12 @@ import helpers
 
 class Chat(chat_pb2_grpc.ChatServicer):
 
+    def __init__(self):
+        self.clientDict = {}
+
+    def SignInExisting(self, username, context):
+        userAttributes = []
+
     def SayHello(self, request, context):
         return helloworld_pb2.HelloReply(message='Hello, %s!' % request.name)
 

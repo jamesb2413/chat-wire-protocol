@@ -32,15 +32,15 @@ def parse(message, clientSock):
     message = message.split()
     operation = message[0]
     if operation == "I":
-        helpers.ServerHelpers.signIn(message, clientSock, userDict)
+        helpers.signIn(message, clientSock, userDict)
     elif operation == "S":
-        helpers.ServerHelpers.sendMsg(message, clientSock, userDict)
+        helpers.sendMsg(message, clientSock, userDict)
     elif operation == "L":
-        helpers.ServerHelpers.sendUserlist(message, clientSock, userDict)
+        helpers.sendUserlist(message, clientSock, userDict)
     elif operation == "D":
-        helpers.ServerHelpers.deleteAcct(clientSock, userDict)
+        helpers.deleteAcct(clientSock, userDict)
     elif operation == "O":
-        helpers.ServerHelpers.logOut(clientSock, userDict)
+        helpers.logOut(clientSock, userDict)
     else:
         pass
 
@@ -49,13 +49,11 @@ def parse(message, clientSock):
 def client_thread(clientSock, ip):
     # Server listens indefinitely
     while True:
-        # print('inside thread: ', clientSock)
         try:
             # Get message from client, max length 280 chars
             message = clientSock.recv(280).decode()
             
             # print IP address of user who sent message and message on server terminal
-            # TODO: Do we want to print message to server?
             if message:
                 print("<" + ip[0] + ">: " + message)
                 
@@ -64,7 +62,8 @@ def client_thread(clientSock, ip):
             
             # Message has no content, remove connection
             else:
-                helpers.ServerHelpers.logOut(clientSock)
+                if helpers.getClientUsername(clientSock, userDict) != "None":
+                    helpers.logOut(clientSock, userDict)
                 remove(clientSock)
                 return
         except:
@@ -72,7 +71,6 @@ def client_thread(clientSock, ip):
 
 # removes specified client from chat
 def remove(clientSock):
-    print("removed!")
     if clientSock in clientSockLst:
         clientSockLst.remove(clientSock)
 
@@ -86,6 +84,3 @@ while True:
     print(ip[0] + " connected")
 
     start_new_thread(client_thread, (clientSock, ip))
-    print('clientSockLst: \n')
-    for clientSock in clientSockLst:
-        print(clientSock, "\n")
