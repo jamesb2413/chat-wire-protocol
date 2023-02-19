@@ -4,6 +4,7 @@ import logging
 import grpc
 import chat_pb2
 import chat_pb2_grpc
+import helpers
 
 
 class Chat(chat_pb2_grpc.ChatServicer):

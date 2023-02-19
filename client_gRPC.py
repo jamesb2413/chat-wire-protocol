@@ -25,9 +25,10 @@ def run():
 
         existsBool = signinLoop()
         if existsBool:
-            print("Please log in with your username and password.")
+            print("Please log in with your username")
             username = input("Username: ")
             unreads = stub.SignInExisting(chat_pb2.Username(name=username))
+
         response = stub.SayHello(helloworld_pb2.HelloRequest(name='you'))
     print("Greeter client received: " + response.message)
 
