@@ -44,45 +44,46 @@ def signinLoop():
     if existsBool:
         print("Please log in with your username")
         username = input("Username: ")
-        
-        message = "I Existing " + username
-        s.send(message.encode())
-        time.sleep(0.1)
-        # Catch errors: (1) account does not exist, (2) account already logged in elsewhere
-        read_socks, _, _ = select.select(socks_list,[],[]) 
-        for read_sock in read_socks: 
-            message = read_sock.recv(2048).decode()
-            messageSplit = message.split(' ', 1)
-            # Error message from server
-            if messageSplit[0] == "S":
-                print(messageSplit[1])
-            # Unread messages
-            elif messageSplit[0] == "You":
-                print("\nCongratulations! You have successfully logged in to your account.\n")
-                print(messageSplit[0] + ' ' + messageSplit[1])
-                return
-            else:
-                return
+        if helpers.checkValidUsername(username):
+            message = "I Existing " + username.split()[0]
+            s.send(message.encode())
+            time.sleep(0.1)
+            # Catch errors: (1) account does not exist, (2) account already logged in elsewhere
+            read_socks, _, _ = select.select(socks_list,[],[]) 
+            for read_sock in read_socks: 
+                message = read_sock.recv(2048).decode()
+                messageSplit = message.split(' ', 1)
+                # Error message from server
+                if messageSplit[0] == "I":
+                    print(messageSplit[1])
+                # Unread messages
+                elif messageSplit[0] == "You":
+                    print("\nCongratulations! You have successfully logged in to your account.\n")
+                    print(messageSplit[0] + ' ' + messageSplit[1])
+                    return
+                else:
+                    return
         signinLoop()
     else:
         print("\nPlease create a new username.")
         newUsername = input("New Username: ")
-        message = "I New " + newUsername
-        s.send(message.encode())
-        time.sleep(0.1)
-        # Catch errors: username already in use by a different account
-        read_socks, _, _ = select.select(socks_list,[],[])  
-        for read_sock in read_socks: 
-            message = read_sock.recv(2048).decode()
-            messageSplit = message.split(' ', 1)
-            # Error message from server
-            if messageSplit[0] == "S":
-                print(messageSplit[1])
-            # Unread messages
-            elif messageSplit[0] == "You":
-                print("\nCongratulations! You have successfully logged in to your account.\n")
-                print(messageSplit[0] + ' ' + messageSplit[1])
-                return
+        if helpers.checkValidUsername(newUsername):
+            message = "I New " + newUsername.split()[0]
+            s.send(message.encode())
+            time.sleep(0.1)
+            # Catch errors: username already in use by a different account
+            read_socks, _, _ = select.select(socks_list,[],[])  
+            for read_sock in read_socks: 
+                message = read_sock.recv(2048).decode()
+                messageSplit = message.split(' ', 1)
+                # Error message from server
+                if messageSplit[0] == "I":
+                    print(messageSplit[1])
+                # Unread messages
+                elif messageSplit[0] == "You":
+                    print("\nCongratulations! You have successfully logged in to your account.\n")
+                    print(messageSplit[0] + ' ' + messageSplit[1])
+                    return
         signinLoop()
 
 # Parse input from either command line or server and do the correct action

@@ -12,7 +12,7 @@ def getClientUsername(clientSock, clientDict):
 def addUser(username, clientSock, clientDict):
     # If username is already taken, notify user and request new username
     if username in clientDict:
-        collideAlert = ("S This username is already taken by another account. Please " 
+        collideAlert = ("I This username is already taken by another account. Please " 
                         "try again with a different username.\n")
         try:
             clientSock.sendall(collideAlert.encode())
@@ -23,31 +23,23 @@ def addUser(username, clientSock, clientDict):
     clientDict[username] = [clientSock, True, []]
     return clientDict[username]
 
-""" def checkValidUsername(username):
-     """
-
+def checkValidUsername(username):
+    usernameWords = username.split()
+    # If user inputs empty string, whitespace, or multiple words as username
+    if len(usernameWords) != 1:
+        print("Your username can only be one word containing letters, numbers, and special characters. " 
+              "Please try again with a different username.\n")
+        return False
+    return True
+    
 # Sign in to existing account OR create new account via call to addUser
 def signIn(message, clientSock, clientDict):
     # Catching username errors
     try:
         username = message[2]
     except:
-        # If user inputs ' ' as username
-        invalidMsg = "S This username is invalid. Please try again with a different username.\n"
-        try:
-            clientSock.sendall(invalidMsg.encode())
-        except:
-            pass
+        print("Critical Signin Error")
         return -1
-
-    # If user inputs more than one word
-    if len(message) > 3:
-        oneWordMsg = "S Your username can only be one word. Please try again."
-        try:
-            clientSock.sendall(oneWordMsg.encode())
-        except:
-            pass
-        return -2
 
     # From clientDict: [socketObj, loggedOnBool, messageQueue]
     userAttributes = []
@@ -57,7 +49,7 @@ def signIn(message, clientSock, clientDict):
             userAttributes = clientDict[username]
             # If user is already logged in, deny access
             if userAttributes[1] == True:
-                doubleLogAlert = ("S This user is already logged in on another device. Please " 
+                doubleLogAlert = ("I This user is already logged in on another device. Please " 
                                   "log out in the other location and try again.\n")
                 try:
                     clientSock.sendall(doubleLogAlert.encode())
@@ -70,7 +62,7 @@ def signIn(message, clientSock, clientDict):
                 userAttributes[0] = clientSock
         except:
             # If account does not exist
-            dneAlert = ("S No users exist with this username. Please double check that you typed correctly "
+            dneAlert = ("I No users exist with this username. Please double check that you typed correctly "
                         "or create a new account with this username.\n")
             try:
                 clientSock.sendall(dneAlert.encode())

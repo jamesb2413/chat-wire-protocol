@@ -31,7 +31,6 @@ def clientSignIn(username):
     if not username or not username.strip():
         return "This username is invalid. Please try again with a different username.\n"
 
-
 # Sign in to existing account OR create new account via call to addUser
 def signIn(username, clientDict):
     # If user inputs '' or ' ' as username
