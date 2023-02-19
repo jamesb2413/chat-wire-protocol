@@ -24,11 +24,11 @@ def addUser(username, clientSock, clientDict):
     return clientDict[username]
 
 # TODO: Unit test
-def checkValidUsername(username):
+def isValidUsername(username):
     usernameWords = username.split()
     # If user inputs empty string, whitespace, or multiple words as username
     if len(usernameWords) != 1:
-        print("Your username can only be one word containing letters, numbers, and special characters. " 
+        print("Usernames can only be one word containing letters, numbers, and special characters. " 
               "Please try again with a different username.\n")
         return False
     return True
@@ -98,31 +98,24 @@ def signIn(message, clientSock, clientDict):
         clientSock.sendall(unreadAlert.encode())
     except:
         pass
+    print("clientDict: ", clientDict)
     return 1
 
 def sendMsg(message, clientSock, clientDict):
-    sender = getClientUsername(clientSock, clientDict)
-    recipient = message[1]
+    sender = message[1]
+    recipient = message[2]
 
     # Error handling message 
     error_handle = "Error sending message to " + recipient + ": "
 
-    if recipient == sender:
-        error_handle += "Cannot send message to self\n"
-        try:
-            clientSock.sendall(error_handle.encode())
-        except:
-            pass
-        return -1
+    raw_msg = " ".join(message[3:])
 
-    raw_msg = " ".join(message[2:])
-
-    # Getting socket of user message was sent to
+    # Getting socket of recipient
     try:
         recipientSock = clientDict[recipient][0]
         loggedIn = clientDict[recipient][1]
     except:
-        error_handle += "User does not exist\n"
+        error_handle += "User does not exist.\n"
         try:
             clientSock.sendall(error_handle.encode())
         except:
