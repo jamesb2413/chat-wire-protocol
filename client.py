@@ -26,7 +26,6 @@ socks_list = [sys.stdin, s]
 read_socks = []
 
 print("Congratulations! You have connected to the chat server.\n")
-username = ""
 
 # Loops requesting user input until a valid sign in. Returns valid username
 def signinLoop():
@@ -79,13 +78,15 @@ def messageLoop(username):
             command = sys.stdin.readline()
             command = command.strip()
             if command == 'S' or command == 's':
-                send_to_user = input("Which user do you want to message? \n Recipient username: ")
-                # Username error checks
-                if not helpers.isValidUsername(send_to_user):
-                    continue
-                if send_to_user == username: 
-                    print("Cannot send message to self.\n")
-                    continue
+                while True:
+                    send_to_user = input("Which user do you want to message? \n Recipient username: ")
+                    # Username error checks
+                    if not helpers.isValidUsername(send_to_user):
+                        continue
+                    if send_to_user == username: 
+                        print("Cannot send message to self.\n")
+                        continue
+                    break
                 message = input("Type the message you would like to send. \n Message: ")
                 complete_msg = "S " + username + " " + send_to_user + " " + message
                 s.send(complete_msg.encode())

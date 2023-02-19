@@ -112,27 +112,27 @@ def sendMsg(message, clientSock, clientDict):
 
     raw_msg = " ".join(message[3:])
 
-    # Getting socket of recipient
+    # Get recipient
     try:
-        recipientSock = clientDict[recipient][0]
-        loggedIn = clientDict[recipient][1]
+        recipientAttributes = clientDict[recipient]
+        loggedIn = recipientAttributes[1]
     except:
         error_handle += "User does not exist.\n"
         try:
             clientSock.sendall(error_handle.encode())
         except:
             pass
-        return -2
+        return -1
 
     # Send message to recipient
     try:
-        # Debugging messages for server
-        # payload = "\nFrom " + sender + ": " + raw_msg + "\n"
+        payload = "\nFrom " + sender + ": " + raw_msg + "\n"
         # print("payload is: " + payload)
 
         # If user is logged in, send the message
         if loggedIn:
             try:
+                recipientSock = recipientAttributes[0]
                 recipientSock.sendall(payload.encode())
             except:
                 pass
@@ -155,7 +155,7 @@ def sendMsg(message, clientSock, clientDict):
             clientSock.sendall(error_handle.encode())
         except:
             pass
-        return -3
+        return -2
     
 def sendUserlist(message, clientSock, clientDict):
     wildcard = message[1].lower()
