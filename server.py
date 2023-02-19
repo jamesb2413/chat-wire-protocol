@@ -89,8 +89,3 @@ while True:
     print('clientSockLst: \n')
     for clientSock in clientSockLst:
         print(clientSock, "\n")
-
-
-
-
-

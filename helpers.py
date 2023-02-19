@@ -34,7 +34,6 @@ class ServerHelpers():
         try:
             username = message[2]
         except:
-            print("2")
             # If user inputs ' ' as username
             invalidMsg = "S This username is invalid. Please try again with a different username.\n"
             try:
