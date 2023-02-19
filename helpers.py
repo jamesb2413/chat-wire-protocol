@@ -23,6 +23,7 @@ def addUser(username, clientSock, clientDict):
     clientDict[username] = [clientSock, True, []]
     return clientDict[username]
 
+# TODO: Unit test
 def checkValidUsername(username):
     usernameWords = username.split()
     # If user inputs empty string, whitespace, or multiple words as username
@@ -31,6 +32,18 @@ def checkValidUsername(username):
               "Please try again with a different username.\n")
         return False
     return True
+
+def existingOrNew():
+    print("Sign In: ")
+    # Determine if user has account or needs to sign up
+    existsInput = input("Do you already have an account? [Y/N] ")
+    if existsInput == 'Y' or existsInput == 'y':
+        return True
+    elif existsInput == 'N' or existsInput == 'n':
+        return False
+    else:
+        print("Invalid response. Please answer with 'Y' or 'N'.")
+        return existingOrNew()
     
 # Sign in to existing account OR create new account via call to addUser
 def signIn(message, clientSock, clientDict):

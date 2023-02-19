@@ -1,22 +1,17 @@
 import grpc
 import chat_pb2
 import chat_pb2_grpc
+import helpers 
+import helpers_gRPC
 
 def signinLoop():
-    print("Sign In: ")
-    # Determine if user has account or needs to sign up
-    existsBool = False
-    while True:
-        existsInput = input("Do you already have an account? [Y/N] ")
-        if existsInput == 'Y' or existsInput == 'y':
-            existsBool = True
-            break
-        elif existsInput == 'N' or existsInput == 'n':
-            existsBool = False
-            break
-        else:
-            print("Invalid response. Please answer with 'Y' or 'N'.")
-    return existsBool
+    existsBool = helpers.existingOrNew()
+    if existsBool:
+        print("Please log in with your username")
+        username = input("Username: ")
+        if helpers.checkValidUsername(username):
+
+        signinLoop()
 
 def run():
     with grpc.insecure_channel('localhost:50051') as channel:

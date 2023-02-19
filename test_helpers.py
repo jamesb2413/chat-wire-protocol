@@ -80,3 +80,5 @@ class TestServer(unittest.TestCase):
         test_dict = {"test1":[1, True, []], "test2":[2, True, []]}
         # log user out 
         self.assertEqual(helpers.logOut(1, test_dict), "test1")
+
+    # TODO: Unit test for checkValidUsername()
