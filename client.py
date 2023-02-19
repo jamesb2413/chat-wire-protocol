@@ -129,7 +129,7 @@ def messageLoop(username):
                 print("Goodbye!\n")
                 time.sleep(0.5)
                 return
-    messageLoop()
+    messageLoop(username)
 
 # Loop indefinitely so user can start over after logging out.
 while True: 
