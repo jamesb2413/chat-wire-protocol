@@ -75,8 +75,7 @@ def messageLoop(username):
             # TODO: close user connection, terminate program if server sends back that account was deleted
         # Input from user
         else: 
-            command = sys.stdin.readline()
-            command = command.strip()
+            command = sys.stdin.readline().strip()
             if command == 'S' or command == 's':
                 while True:
                     send_to_user = input("Which user do you want to message? \n Recipient username: ")
@@ -138,8 +137,6 @@ while True:
     # Check: Will there be problems if a message arrives between login and beginning of while loop?
     print("If any messages arrive while you are logged in, they will be immediately displayed.\n")
     print("Use the following commands to interact with the chat app: \n")
-    # if numMessages > 0:
-        # print("R: Read new messages")
     print(" -----------------------------------------------")
     print("|L: List all accounts that exist on this server.|")
     print("|S: Send a message to another user.             |")

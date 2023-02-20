@@ -14,9 +14,8 @@ def signinLoop(stub):
         if helpers.isValidUsername(username):
             # Remove whitespace
             username = username.strip().lower()
-            print("username:", username)
             unreadsOrError = stub.SignInExisting(chat_pb2.Username(name=username))
-            eFlag, msg = unreadsOrError.errorFlag, unreadsOrError.message
+            eFlag, msg = unreadsOrError.errorFlag, unreadsOrError.unreads
     else:
         print("\nPlease create a new username.")
         username = input("New Username: ")
@@ -24,16 +23,35 @@ def signinLoop(stub):
         if helpers.isValidUsername(username):
             # Remove whitespace
             username = username.strip().lower()
-            print("username:", username)
             unreadsOrError = stub.AddUser(chat_pb2.Username(name=username))
-            eFlag, msg = unreadsOrError.errorFlag, unreadsOrError.message
+            eFlag, msg = unreadsOrError.errorFlag, unreadsOrError.unreads
     if eFlag:
         print(msg)
         return signinLoop()
     else:
         print("\nCongratulations! You have successfully logged in to your account.\n")
-        print(message)
+        print(msg)
         return username
+
+def messageLoop(username, stub):
+    serverStream(stub)
+    command = sys.stdin.readline().strip()
+    if command == 'S' or command == 's':
+        while True:
+            send_to_user = input("Which user do you want to message? \n Recipient username: ")
+            # Username error checks
+            if not helpers.isValidUsername(send_to_user):
+                continue
+            if send_to_user == username: 
+                print("Cannot send message to self.\n")
+                continue
+            break
+        message = input("Type the message you would like to send. \n Message: ")
+        # Send sender username, recipient username, and message to the server & store confirmation response
+        senderResponse = stub.Send(chat_pb2.Username(name=username), 
+                                   chat_pb2.Username(name=send_to_user), 
+                                   chat_pb2.RequestMessage(payload=message))
+        
 
 def run():
     with grpc.insecure_channel('localhost:50051') as channel:
@@ -55,8 +73,10 @@ def run():
             print("|D: Delete account.                             |")
             print(" ----------------------------------------------- \n")
             print("Command: ")
-            # Wait for input from either command line or server
-            # messageLoop(username)
+            # Establish bi-directional stream to receive messages from server
+            responseStream = stub.Listen(chat_pb2.Username(name=username))
+            # Wait for input from command line
+            messageLoop(username, stub)
         
 
         # response = stub.SayHello(helloworld_pb2.HelloRequest(name='you'))

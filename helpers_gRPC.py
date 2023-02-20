@@ -2,16 +2,6 @@ def enqueueMsg(message, recipient, clientDict):
         clientDict[recipient][2].append(message)
         return clientDict[recipient][2][-1]
 
-# Get username from client socket object
-def getClientUsername(clientSock, clientDict):
-    print("----------")
-    print("getClientUsername clientSock: ", clientSock)
-    print("----------")
-    for key in clientDict.keys():
-        if clientDict[key][0] == clientSock:
-            return key
-    print("CRITICAL ERROR: Operating on nonexistent user")
-
 # Create new user with input username. Returns (errorFlag, errorMsg).
 def addUser(username, clientDict):
     # If username is already taken, notify user and request new username
@@ -47,42 +37,25 @@ def signInExisting(username, clientDict):
     userAttributes[1] = []
     return (False, unreads)
     
-
-def sendMsg(message, clientSock, clientDict):
-    sender = getClientUsername(clientSock, clientDict)
-    recipient = message[1]
-
+# Returns (errorFlag, payload)
+def sendMsg(sender, recipient, message, clientDict):
     # Error handling message 
     error_handle = "Error sending message to " + recipient + ": "
 
-    if recipient == sender:
-        error_handle += "Cannot send message to self\n"
-        try:
-            clientSock.sendall(error_handle.encode())
-        except:
-            pass
-        return -1
-
-    raw_msg = " ".join(message[2:])
-
-    # Getting socket of user message was sent to
+    # Get recipient data
     try:
-        recipientSock = clientDict[recipient][0]
-        loggedIn = clientDict[recipient][1]
+        recipientAttributes = clientDict[recipient]
+        loggedIn = recipientAttributes[1]
     except:
         error_handle += "User does not exist\n"
-        try:
-            clientSock.sendall(error_handle.encode())
-        except:
-            pass
-        return -2
+        return True, error_handle
 
     # Send message to recipient
     try:
-        payload = "\nFrom " + sender + ": " + raw_msg + "\n"
+        recipientMsg = "\nFrom " + sender + ": " + message + "\n"
         senderNote = "Message sent.\n"
-        print("payload is: " + payload)
-        # If user is logged in, send the message
+        # print("payload is: " + payload)
+        # If recipient is logged in, send the message
         if loggedIn:
             try:
                 recipientSock.sendall(payload.encode())

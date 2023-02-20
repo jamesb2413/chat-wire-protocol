@@ -106,15 +106,7 @@ def sendMsg(message, clientSock, clientDict):
 
     raw_msg = " ".join(message[3:])
 
-    if sender == recipient:
-        error_handle += "Cannot send message to self.\n"
-        try:
-            clientSock.sendall(error_handle.encode())
-        except:
-            pass
-        return -1
-
-    # Get recipient
+    # Get recipient data
     try:
         recipientAttributes = clientDict[recipient]
         loggedIn = recipientAttributes[1]
@@ -131,7 +123,7 @@ def sendMsg(message, clientSock, clientDict):
         payload = "\nFrom " + sender + ": " + raw_msg + "\n"
         # print("payload is: " + payload)
 
-        # If user is logged in, send the message
+        # If recipient is logged in, send the message
         if loggedIn:
             try:
                 recipientSock = recipientAttributes[0]
