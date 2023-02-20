@@ -45,7 +45,7 @@ def addUser(username, clientSock, clientDict):
 def signIn(message, clientSock, clientDict):
     # Catching username errors
     try:
-        username = message[2].lower()
+        username = message[2]
     except:
         print("Critical Signin Error")
         return -1
@@ -84,12 +84,13 @@ def signIn(message, clientSock, clientDict):
         # Handle collisions
         if userAttributes == -1:
             return -5
-    unreads = clientDict[username][2]
+    unreads = userAttributes[2]
     unreadNum = str(len(unreads))
     unreadAlert = "You have " + unreadNum + " unread messages:\n\n"
     for msg in unreads:
         unreadAlert += msg + "\n\n"
-    clientDict[username][2] = []
+    # Reset unreads queue
+    userAttributes[2] = []
     try:
         clientSock.sendall(unreadAlert.encode())
     except:
@@ -194,13 +195,3 @@ def sendUserlist(message, clientSock, clientDict):
     except:
         pass
     return matches
-
-def deleteAcct(message, clientDict):
-    toDelete = message[1]
-    clientDict.pop(toDelete)
-    return toDelete
-
-def logOut(message, clientDict):
-    toLogOut = message[1]
-    clientDict[toLogOut][1] = False
-    return toLogOut

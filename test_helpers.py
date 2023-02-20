@@ -71,14 +71,4 @@ class TestServer(unittest.TestCase):
         # user uses wildcard only
         self.assertEqual(helpers.sendUserlist(good_message_4, 1, test_dict), ["test1", "test2", "test3", "test4", "foo"])
 
-    def test_deleteAcct(self):
-        test_dict = {"test1":[1, True, []], "test2":[2, True, []]}
-        # delete user from database 
-        self.assertEqual(helpers.deleteAcct(1, test_dict), "test1")
-    
-    def test_logOut(self):
-        test_dict = {"test1":[1, True, []], "test2":[2, True, []]}
-        # log user out 
-        self.assertEqual(helpers.logOut(1, test_dict), "test1")
-
     # TODO: Unit test for checkValidUsername()

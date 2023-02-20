@@ -31,65 +31,38 @@ def clientSignIn(username):
     if not username or not username.strip():
         return "This username is invalid. Please try again with a different username.\n"
 
-# Sign in to existing account OR create new account via call to addUser
-def signIn(username, clientDict):
-    # If user inputs '' or ' ' as username
-    if not username or not username.strip():
-        return "This username is invalid. Please try again with a different username.\n"
-
-    userAttributes = []
-
-    # If user inputs more than one word
-    if len(message) > 3:
-        oneWordMsg = "S Your username can only be one word. Please try again."
-        try:
-            clientSock.sendall(oneWordMsg.encode())
-        except:
-            pass
-        return -2
-
-    if message[1] == "Existing":
-        try:
-            userAttributes = clientDict[username]
-            # If user is already logged in, deny access
-            if userAttributes[1] == True:
-                doubleLogAlert = ("S This user is already logged in on another device. Please " 
-                                "log out in the other location and try again.\n")
-                try:
-                    clientSock.sendall(doubleLogAlert.encode())
-                except:
-                    pass
-                return -3
-            # Set user as logged in and update socket object
-            else:
-                userAttributes[1] = True
-                userAttributes[0] = clientSock
-        except:
-            # If account does not exist
-            dneAlert = ("S No users exist with this username. Please double check that you typed correctly "
-                        "or create a new account with this username.\n")
-            try:
-                clientSock.sendall(dneAlert.encode())
-            except:
-                pass
-            return -4
-    # Create new user with input username
-    else:
-        userAttributes = addUser(username, clientSock, clientDict)
-        # Handle collisions
-        if userAttributes == -1:
-            return -5
-    unreads = clientDict[username][2]
-    unreadNum = str(len(unreads))
-    unreadAlert = "You have " + unreadNum + " unread messages:\n\n"
-    for msg in unreads:
-        unreadAlert += msg + "\n\n"
-    clientDict[username][2] = []
+# Sign in to existing account.
+def signInExisting(username, clientDict):
     try:
-        clientSock.sendall(unreadAlert.encode())
+        # From clientDict: [loggedOnBool, messageQueue]
+        userAttributes = clientDict[username]
+        # If user is already logged in, return error
+        if userAttributes[0] == True:
+            return ("This user is already logged in on another device. Please "
+                    "log out in the other location and try again.\n")
+        # Set user as logged in and update socket object
+        else:
+            userAttributes[0] = True
     except:
-        pass
-    return 1
+        # If account does not exist
+        return ("No users exist with this username. Please double check that you typed correctly "
+                "or create a new account with this username.\n")
+    unreadsLst = userAttributes[1]
+    unreadsNum = str(len(unreadsLst))
+    unreads = "You have " + unreadNum + " unread messages:\n\n"
+    for msg in unreadsLst:
+        unreads += msg + "\n\n"
+    # Reset unreads queue
+    userAttributes[1] = []
+    return unreads
+
+# Create new user with input username
+def addUser(username, clientDict):
+    userAttributes = addUser(username, clientSock, clientDict)
+    # Handle collisions
+    if userAttributes == -1:
+        return -5
+    
 
 def sendMsg(message, clientSock, clientDict):
     sender = getClientUsername(clientSock, clientDict)

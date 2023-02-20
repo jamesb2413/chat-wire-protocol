@@ -38,9 +38,9 @@ def parse(message, clientSock):
     elif operation == "L":
         helpers.sendUserlist(message, clientSock, clientDict)
     elif operation == "D":
-        helpers.deleteAcct(message, clientDict)
+        clientDict.pop(message[1])
     elif operation == "O":
-        helpers.logOut(message, clientDict)
+        clientDict[message[1]][1] = False
     else:
         pass
 
@@ -62,8 +62,9 @@ def client_thread(clientSock, ip):
             
             # Message has no content, remove connection
             else:
-                if helpers.getClientUsername(clientSock, clientDict) != "None":
-                    helpers.logOut(clientSock, clientDict)
+                for username in clientDict:
+                    if clientDict[username][0] == clientSock:
+                        clientDict[username][1] = False
                 remove(clientSock)
                 return
         except:
