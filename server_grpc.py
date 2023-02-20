@@ -14,23 +14,24 @@ class ChatServicer(chat_pb2_grpc.ChatServicer):
 
     def SignInExisting(self, username, context):
         eFlag, msg = helpers_grpc.signInExisting(username.name, self.clientDict)
-        return chat_pb2.UnreadsOrError(errorFlag=eFlag, unreads=msg)
+        return chat_pb2.Unreads(errorFlag=eFlag, unreads=msg)
     
     def AddUser(self, username, context):
         eFlag, msg = helpers_grpc.addUser(username.name, self.clientDict)
-        return chat_pb2.UnreadsOrError(errorFlag=eFlag, unreads=msg)
+        return chat_pb2.Unreads(errorFlag=eFlag, unreads=msg)
 
-    def Send(self, sender, recipient, request, context):
-        response = helpers_grpc.sendMsg(sender.name, recipient.name, request.msg, self.clientDict)
+    def Send(self, sendRequest, context):
+        response = helpers_grpc.sendMsg(sendRequest.sender.name, sendRequest.recipient.name, 
+                                        sendRequest.sentMsg.msg, self.clientDict)
         return chat_pb2.Payload(msg=response)
 
     # usernameStream only comes from logged-in user
     def Listen(self, usernameStream, context):
         for username in usernameStream:
             # Message queued
-            if len(self.clientDict[username][1]) > 0:
+            if len(self.clientDict[username.name][1]) > 0:
                 # Yield first message
-                yield chat_pb2.Payload(msg=self.clientDict[username][1].pop(0))
+                yield chat_pb2.Payload(msg=self.clientDict[username.name][1].pop(0))
 
 
 def serve():
