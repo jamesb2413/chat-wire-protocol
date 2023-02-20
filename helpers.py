@@ -64,7 +64,7 @@ def signIn(message, clientSock, clientDict):
                     clientSock.sendall(doubleLogAlert.encode())
                 except:
                     pass
-                return -3
+                return -2
             # Set user as logged in and update socket object
             else:
                 userAttributes[1] = True
@@ -77,13 +77,13 @@ def signIn(message, clientSock, clientDict):
                 clientSock.sendall(dneAlert.encode())
             except:
                 pass
-            return -4
+            return -3
     # Create new user with input username
     else:
         userAttributes = addUser(username, clientSock, clientDict)
         # Handle collisions
         if userAttributes == -1:
-            return -5
+            return -4
     unreads = userAttributes[2]
     unreadNum = str(len(unreads))
     unreadAlert = "You have " + unreadNum + " unread messages:\n\n"
@@ -106,6 +106,14 @@ def sendMsg(message, clientSock, clientDict):
 
     raw_msg = " ".join(message[3:])
 
+    if sender == recipient:
+        error_handle += "Cannot send message to self.\n"
+        try:
+            clientSock.sendall(error_handle.encode())
+        except:
+            pass
+        return -1
+
     # Get recipient
     try:
         recipientAttributes = clientDict[recipient]
@@ -116,7 +124,7 @@ def sendMsg(message, clientSock, clientDict):
             clientSock.sendall(error_handle.encode())
         except:
             pass
-        return -1
+        return -2
 
     # Send message to recipient
     try:
