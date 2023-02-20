@@ -1,0 +1,65 @@
+Engineering Notebook
+
+-----------------------------------------------------------------------------------------------------------------------------------------------
+Progress: Getting started
+
+We didn't have any experience with programming with sockets or distributed systems, so we looked to the internet to read the documentation about 
+sockets: https://docs.python.org/3/library/socket.html
+
+And looked at some code for a basic chatroom implementation using the socket library, which wasn't exactly what we wanted, but gave us a 
+jumping off point for some of the basic architecture for our client/server chat: https://www.geeksforgeeks.org/simple-chat-room-using-python/
+
+At this point, we were able to connect multiple clients to the server across multiple machines, and we could send messages to the server which 
+would be displayed to all other clients that were connected.
+
+-----------------------------------------------------------------------------------------------------------------------------------------------
+Progress: Basic functionality, wire protocol implementation
+
+Now that we built the basic architecture for the server, we could start adding some of the additional features that we were going to need. We 
+implemented one-to-one communication, listing all clients, login/out, and deleting accounts. This required implementing our own wire protocol, 
+which consisted of different strings being constructed based on which operation the client wanted to execute. On the server side, we created a 
+function to parse incoming strings from the client, and execute different branches of the code based on the content of the strings.
+
+-----------------------------------------------------------------------------------------------------------------------------------------------
+Refactor: Modularizing the code
+
+Initially, all helper functions existed inside the files in which they were used. We decided it was much cleaner to create a helpers.py file 
+with all of the helper functions stored inside a helper class. This makes both the server, client, and helper files all much more digestible and 
+easier to debug or change if necessary.
+
+-----------------------------------------------------------------------------------------------------------------------------------------------
+Progress: List function wildcard character
+
+After realizing we misread the spec for the "list" functionality, we added wildcard support, which allowed a user to use the "*" character at the 
+end of a string to specify to the server that they want it to list all users which start with the characters which appear before it.
+
+-----------------------------------------------------------------------------------------------------------------------------------------------
+Major Bug: Using socket object as unique client identifier
+
+We initially maintained a global dictionary which stores client information. The key is the username, and the value associated with each key is
+a list, with the first item being the socket object associated with that client, the second being a boolean which indicates if that user is 
+currently logged in, and the third being an initially empty list which stores messages sent to that user if they are logged out. We tried using 
+the socket object as the unique identifier for each user, however there was a bug that could occur by using this method. A client could create an 
+account/login to their existing account, log out, and create a new account (logging them in again) all from the same terminal. At this point, if 
+they logged out again, the logOut function would look for their socket object, find it on the first user (that was already logged out) and set 
+their login status to False, subsequently disconnecting the user from the server. Now, if that user tried logging back into their second account, 
+the dictionary would still have them recorded as logged in, and so it would return an error back to that client that the user they were trying to 
+log in to is already logged in. At this point the bug is clear--the second account was locked out, and the only way to fix this would be to 
+reboot the server entirely. 
+
+In order to fix this bug, we needed to refactor the code to store the username associated with a given client on the client side as well, and 
+send it to the server whenever the client issued a command. This works because each username paired with its corresponding socket object tuple 
+is unique, and thus can be used to logout a user confidenly without worrying about lockout issues. 
+
+-----------------------------------------------------------------------------------------------------------------------------------------------
+Progress: Unit tests
+
+Now that the custom wire protocol implementation was mostly up and running, we created unit tests using python's unittest library. We learned 
+more about how to write unit tests and how to write good unit tests using the resources below:
+
+unittest documentation: https://docs.python.org/3/library/unittest.html
+unittest tutorial: https://www.youtube.com/watch?v=6tNS--WetLI
+
+-----------------------------------------------------------------------------------------------------------------------------------------------
+Progress: gRPC implementation
+
