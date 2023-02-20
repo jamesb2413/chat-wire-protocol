@@ -140,13 +140,3 @@ def sendUserlist(message, clientSock, clientDict):
     except:
         pass
     return res
-
-def deleteAcct(clientSock, clientDict):
-    toDelete = getClientUsername(clientSock, clientDict)
-    clientDict.pop(toDelete)
-    return toDelete
-
-def logOut(clientSock, clientDict):
-    toLogOut = getClientUsername(clientSock, clientDict)
-    clientDict[toLogOut][1] = False
-    return toLogOut

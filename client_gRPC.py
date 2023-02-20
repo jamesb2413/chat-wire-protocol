@@ -2,26 +2,31 @@ import grpc
 import chat_pb2
 import chat_pb2_grpc
 import helpers 
-import helpers_gRPC
+import helpers_grpc
+import logging
 
-def signinLoop():
+def signinLoop(stub):
     existsBool = helpers.existingOrNew()
     if existsBool:
         print("Please log in with your username")
         username = input("Username: ")
         # Username error check
-        if helpers.checkValidUsername(username):
+        if helpers.isValidUsername(username):
             # Remove whitespace
             username = username.strip().lower()
-            eFlag, msg = stub.SignInExisting(chat_pb2.Username(name=username))
+            print("username:", username)
+            unreadsOrError = stub.SignInExisting(chat_pb2.Username(name=username))
+            eFlag, msg = unreadsOrError.errorFlag, unreadsOrError.message
     else:
         print("\nPlease create a new username.")
         username = input("New Username: ")
         # Username error check
-        if helpers.checkValidUsername(username):
+        if helpers.isValidUsername(username):
             # Remove whitespace
             username = username.strip().lower()
-            eFlag, msg = stub.AddUser(chat_pb2.Username(name=username))
+            print("username:", username)
+            unreadsOrError = stub.AddUser(chat_pb2.Username(name=username))
+            eFlag, msg = unreadsOrError.errorFlag, unreadsOrError.message
     if eFlag:
         print(msg)
         return signinLoop()
@@ -36,7 +41,7 @@ def run():
         print("Congratulations! You have connected to the chat server.\n")
 
         while True:
-            username = signinLoop()
+            username = signinLoop(stub)
             # Now, the user is logged in. Notify the user of possible functions
             # Check: Will there be problems if a message arrives between login and beginning of while loop?
             print("If any messages arrive while you are logged in, they will be immediately displayed.\n")
@@ -51,11 +56,10 @@ def run():
             print(" ----------------------------------------------- \n")
             print("Command: ")
             # Wait for input from either command line or server
-            messageLoop(username)
+            # messageLoop(username)
         
 
-        response = stub.SayHello(helloworld_pb2.HelloRequest(name='you'))
-    print("Greeter client received: " + response.message)
+        # response = stub.SayHello(helloworld_pb2.HelloRequest(name='you'))
 
 
 if __name__ == '__main__':

@@ -6,16 +6,17 @@ package chat;
 service Chat {
     // A simple RPC.
     //
-    // Signs in and gets unread messages.
-    rpc SignIn(Username) returns (UnreadsOrError) {}
+    // Signs in existing user and gets unread messages.
+    rpc SignInExisting(Username) returns (UnreadsOrError) {}
+    // Signs in new user and gets unread messages.
     rpc AddUser(Username) returns (UnreadsOrError) {}
     // Sends message to recipient with Username
-    rpc Send(Username, SendMessage) returns (SenderNote) {}
-    rpc List(Wildcard) returns ()
+    // rpc Send(Username, SendMessage) returns (SenderNote) {}
+    // rpc List(Wildcard) returns () {}
 }
 
 message Username {
-    required string name = 1;
+    string name = 1;
 }
 
 message UnreadsOrError {
@@ -24,7 +25,7 @@ message UnreadsOrError {
 }
 
 // The response message
-message SenderNote {
-    string message = 1;
-}
+// message SenderNote {
+//     string message = 1;
+// }
 
