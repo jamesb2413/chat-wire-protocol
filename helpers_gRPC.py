@@ -12,41 +12,32 @@ def getClientUsername(clientSock, clientDict):
             return key
     print("CRITICAL ERROR: Operating on nonexistent user")
 
-def addUser(username, clientSock, clientDict):
+# Create new user with input username. Returns (errorFlag, errorMsg).
+def addUser(username, clientDict):
     # If username is already taken, notify user and request new username
     if username in clientDict:
-        collideAlert = ("S This username is already taken by another account. Please " 
-                        "try again with a different username.\n")
-        try:
-            clientSock.sendall(collideAlert.encode())
-        except:
-            pass
-        return -1
+        return (True, "This username is already taken by another account. Please " +
+                      "try again with a different username.\n")
     # If username is valid, create new user in userDict
-    clientDict[username] = [clientSock, True, []]
-    return clientDict[username]
+    clientDict[username] = [True, []]
+    return (False, "")
 
-def clientSignIn(username):
-    # If user inputs '' or ' ' as username
-    if not username or not username.strip():
-        return "This username is invalid. Please try again with a different username.\n"
-
-# Sign in to existing account.
+# Sign in to existing account. Returns (errorFlag, message).
 def signInExisting(username, clientDict):
     try:
         # From clientDict: [loggedOnBool, messageQueue]
         userAttributes = clientDict[username]
         # If user is already logged in, return error
         if userAttributes[0] == True:
-            return ("This user is already logged in on another device. Please "
-                    "log out in the other location and try again.\n")
+            return (True, "This user is already logged in on another device. Please " +
+                          "log out in the other location and try again.\n")
         # Set user as logged in and update socket object
         else:
             userAttributes[0] = True
     except:
         # If account does not exist
-        return ("No users exist with this username. Please double check that you typed correctly "
-                "or create a new account with this username.\n")
+        return (True, "No users exist with this username. Please double check that you typed correctly " +
+                      "or create a new account with this username.\n")
     unreadsLst = userAttributes[1]
     unreadsNum = str(len(unreadsLst))
     unreads = "You have " + unreadNum + " unread messages:\n\n"
@@ -54,14 +45,7 @@ def signInExisting(username, clientDict):
         unreads += msg + "\n\n"
     # Reset unreads queue
     userAttributes[1] = []
-    return unreads
-
-# Create new user with input username
-def addUser(username, clientDict):
-    userAttributes = addUser(username, clientSock, clientDict)
-    # Handle collisions
-    if userAttributes == -1:
-        return -5
+    return (False, unreads)
     
 
 def sendMsg(message, clientSock, clientDict):

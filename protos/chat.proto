@@ -7,9 +7,8 @@ service Chat {
     // A simple RPC.
     //
     // Signs in and gets unread messages.
-    rpc SignInExisting(Username) returns (UnreadsOrError) {}
+    rpc SignIn(Username) returns (UnreadsOrError) {}
     rpc AddUser(Username) returns (UnreadsOrError) {}
-    rpc SignInError() returns (Error) {}
     // Sends message to recipient with Username
     rpc Send(Username, SendMessage) returns (SenderNote) {}
     rpc List(Wildcard) returns ()
@@ -20,6 +19,7 @@ message Username {
 }
 
 message UnreadsOrError {
+    bool errorFlag = 1;
     string message = 2; 
 }
 

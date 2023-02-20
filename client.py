@@ -54,13 +54,13 @@ def signinLoop():
             # Error message from server
             if messageSplit[0] == "I":
                 print(messageSplit[1])
+                return signinLoop()
             # Unread messages
             else: 
                 assert(messageSplit[0] == "You")
                 print("\nCongratulations! You have successfully logged in to your account.\n")
                 print(message)
                 return username
-    return signinLoop()
 
 # Parse input from either command line or server and do the correct action
 def messageLoop(username):

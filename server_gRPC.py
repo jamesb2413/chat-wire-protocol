@@ -13,8 +13,12 @@ class Chat(chat_pb2_grpc.ChatServicer):
         self.clientDict = {}
 
     def SignInExisting(self, username, context):
-        unreadsOrError = helpers_gRPC.signInExisting(username, self.clientDict)
-        return chat_pb2.UnreadsOrError(message=unreadsOrError)
+        eFlag, msg = helpers_gRPC.signInExisting(username, self.clientDict)
+        return chat_pb2.UnreadsOrError(errorFlag = eFlg, message=msg)
+    
+    def AddUser(self, username, context):
+        eFlag, msg = helpers_gRPC.addUser(username, self.clientDict)
+        return chat_pb2.UnreadsOrError(errorFlag = eFlg, message=msg)
 
     def SayHello(self, request, context):
         return helloworld_pb2.HelloReply(message='Hello, %s!' % request.name)

@@ -13,7 +13,7 @@ def signinLoop():
         if helpers.checkValidUsername(username):
             # Remove whitespace
             username = username.strip().lower()
-            unreadsOrError = stub.SignInExisting(chat_pb2.Username(name=username))
+            eFlag, msg = stub.SignInExisting(chat_pb2.Username(name=username))
     else:
         print("\nPlease create a new username.")
         username = input("New Username: ")
@@ -21,9 +21,14 @@ def signinLoop():
         if helpers.checkValidUsername(username):
             # Remove whitespace
             username = username.strip().lower()
-            unreadsOrError = stub.SignInNews(chat_pb2.Username(name=username))
-
-    signinLoop()
+            eFlag, msg = stub.AddUser(chat_pb2.Username(name=username))
+    if eFlag:
+        print(msg)
+        return signinLoop()
+    else:
+        print("\nCongratulations! You have successfully logged in to your account.\n")
+        print(message)
+        return username
 
 def run():
     with grpc.insecure_channel('localhost:50051') as channel:
