@@ -23,10 +23,6 @@ def existingOrNew():
 
 
 ## Used in server
-def enqueueMsg(message, recipient, clientDict):
-    clientDict[recipient][2].append(message)
-    return clientDict[recipient][2][-1]
-
 def addUser(username, clientSock, clientDict):
     # If username is already taken, notify user and request new username
     if username in clientDict:
@@ -132,7 +128,7 @@ def sendMsg(message, clientSock, clientDict):
                 pass
         # If user is logged out, add to their queue
         else:
-            enqueueMsg(payload, recipient, clientDict)
+            clientDict[recipient][2].append(payload)
         
         # Notify sender that message has been sent.
         senderNote = "Message sent.\n"

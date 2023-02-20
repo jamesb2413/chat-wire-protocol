@@ -10,10 +10,6 @@ class TestServer(unittest.TestCase):
         self.assertEqual(helpers.isValidUsername("test1"), True)
         # client does not enter valid username
         self.assertEqual(helpers.isValidUsername(""), False)
-
-    def test_enqueueMsg(self):
-        # add message to user's queue
-        self.assertEqual(helpers.enqueueMsg("test message appended", "test1", {"test1": [1, True, ["wrong", "wrong", "wrong"]]}), "test message appended")
     
     def test_addUser(self):
         test_dict = {}
