@@ -7,11 +7,11 @@ service Chat {
     // A simple RPC.
     //
     // Signs in existing user and gets unread messages.
-    rpc SignInExisting(Username) returns (UnreadsOrError) {}
+    rpc SignInExisting(Username) returns (Unreads) {}
     // Signs in new user and gets unread messages.
-    rpc AddUser(Username) returns (UnreadsOrError) {}
+    rpc AddUser(Username) returns (Unreads) {}
     // Sends message to recipient with Username
-    rpc Send(Username, Username, Payload) returns (Payload) {}
+    rpc Send(SendRequest) returns (Payload) {}
     // Bidirectional stream for client to receive messages from server
     rpc Listen(stream Username) returns (stream Payload) {}
     // rpc List(Wildcard) returns () {}
@@ -34,5 +34,11 @@ message Unreads {
 // Can also be error message.
 message Payload {
     string msg = 1;
+}
+
+message SendRequest {
+    Username sender = 1;
+    Username recipient = 2;
+    Payload sentMsg = 3;
 }
 
