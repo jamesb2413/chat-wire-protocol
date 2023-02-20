@@ -11,9 +11,9 @@ service Chat {
     // Signs in new user and gets unread messages.
     rpc AddUser(Username) returns (UnreadsOrError) {}
     // Sends message to recipient with Username
-    rpc Send(Username, Username, RequestMessage) returns (ResponseMessage) {}
+    rpc Send(Username, Username, Payload) returns (Payload) {}
     // Bidirectional stream for client to receive messages from server
-    rpc Listen(stream Username) returns (stream ResponseMessage) {}
+    rpc Listen(stream Username) returns (stream Payload) {}
     // rpc List(Wildcard) returns () {}
 }
 
@@ -28,16 +28,11 @@ message Unreads {
     string unreads = 2; 
 }
 
-// Sent from the sender's client to the server. Payload is a message to send.
-message RequestMessage {
-    string payload = 1;
-}
-
-// Sent from the server to senders and recipients of messages.
-// If errorFlag == 1, payload is an error message.
-// Else, payload is a confirmation for the sender or a message for the recipient.
-message ResponseMessage {
-    bool errorFlag = 1;
-    string payload = 2;
+// If sent from the sender's client to the server, Payload is a message to send.
+// If sent from server to sender, Payload is sent confirmation.
+// If sent from server to recipient, Payload is sent message. 
+// Can also be error message.
+message Payload {
+    string msg = 1;
 }
 

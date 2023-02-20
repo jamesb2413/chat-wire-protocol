@@ -1,7 +1,3 @@
-def enqueueMsg(message, recipient, clientDict):
-        clientDict[recipient][2].append(message)
-        return clientDict[recipient][2][-1]
-
 # Create new user with input username. Returns (errorFlag, errorMsg).
 def addUser(username, clientDict):
     # If username is already taken, notify user and request new username
@@ -37,7 +33,7 @@ def signInExisting(username, clientDict):
     userAttributes[1] = []
     return (False, unreads)
     
-# Returns (errorFlag, payload)
+# Returns error message or sender confirmation & enqueues message for recipient
 def sendMsg(sender, recipient, message, clientDict):
     # Error handling message 
     error_handle = "Error sending message to " + recipient + ": "
@@ -48,37 +44,20 @@ def sendMsg(sender, recipient, message, clientDict):
         loggedIn = recipientAttributes[1]
     except:
         error_handle += "User does not exist\n"
-        return True, error_handle
+        return error_handle
 
     # Send message to recipient
     try:
         recipientMsg = "\nFrom " + sender + ": " + message + "\n"
         senderNote = "Message sent.\n"
         # print("payload is: " + payload)
-        # If recipient is logged in, send the message
-        if loggedIn:
-            try:
-                recipientSock.sendall(payload.encode())
-            except:
-                pass
-        # If user is logged out, add to their queue
-        # NOTE Not sure if this works since no log out function yet to set 
-        # bool to false
-        else:
-            enqueueMsg(payload, recipient, clientDict)
-        try:
-            clientSock.sendall(senderNote.encode())
-        except:
-            pass
-        return 1
+
+        # Enqueue the message
+        clientDict[recipient][1].append(recipientMsg)
+        return senderNote
     except:
-        recipient.close()
         error_handle += "Recipient connection error"
-        try:
-            clientSock.sendall(error_handle.encode())
-        except:
-            pass
-        return -3
+        return error_handle
     
 def sendUserlist(message, clientSock, clientDict):
     wildcard = message[1]

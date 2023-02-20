@@ -51,6 +51,13 @@ def messageLoop(username, stub):
         senderResponse = stub.Send(chat_pb2.Username(name=username), 
                                    chat_pb2.Username(name=send_to_user), 
                                    chat_pb2.RequestMessage(payload=message))
+        print(senderResponse.msg)
+    if command == 'L' or command == 'l':
+        pass
+    messageLoop(username, stub)
+def usernameStream(username):
+    while True:
+        yield chat_pb2.Username(name=username)
         
 
 def run():
@@ -74,7 +81,7 @@ def run():
             print(" ----------------------------------------------- \n")
             print("Command: ")
             # Establish bi-directional stream to receive messages from server
-            responseStream = stub.Listen(chat_pb2.Username(name=username))
+            responseStream = stub.Listen(usernameStream(username))
             # Wait for input from command line
             messageLoop(username, stub)
         

@@ -21,17 +21,16 @@ class ChatServicer(chat_pb2_grpc.ChatServicer):
         return chat_pb2.UnreadsOrError(errorFlag=eFlag, unreads=msg)
 
     def Send(self, sender, recipient, request, context):
-        eFlag, msg = helpers_grpc.sendMsg(sender.name, recipient.name, request.payload, self.clientDict)
-        return chat_pb2.ResponseMessage(errorFlag=eFlag, payload=msg)
+        response = helpers_grpc.sendMsg(sender.name, recipient.name, request.msg, self.clientDict)
+        return chat_pb2.Payload(msg=response)
 
-    # Only running if user is logged in
-    def Listen(self, username, context):
-        while True:
+    # usernameStream only comes from logged-in user
+    def Listen(self, usernameStream, context):
+        for username in usernameStream:
+            # Message queued
             if len(self.clientDict[username][1]) > 0:
-
-
-    # def SayHello(self, request, context):
-    #     return helloworld_pb2.HelloReply(message='Hello, %s!' % request.name)
+                # Yield first message
+                yield chat_pb2.Payload(msg=self.clientDict[username][1].pop(0))
 
 
 def serve():
