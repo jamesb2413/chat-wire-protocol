@@ -100,6 +100,14 @@ def sendMsg(message, clientSock, clientDict):
     # Error handling message 
     error_handle = "Error sending message to " + recipient + ": "
 
+    if sender == recipient:
+        error_handle += "Cannot send message to self.\n"
+        try:
+            clientSock.sendall(error_handle.encode())
+        except:
+            pass
+        return -1
+
     raw_msg = " ".join(message[3:])
 
     # Get recipient data
@@ -151,12 +159,21 @@ def sendUserlist(message, clientSock, clientDict):
     wildcard = message[1].lower()
     allUsers, matches = list(clientDict.keys()), list(clientDict.keys())
 
+    #TODO: If * entered before characters, return error message
+
     # return list of all users
     if wildcard == "":
         pass
 
     # return list of qualifying users
     elif "*" in wildcard:
+        if wildcard[-1] != "*":
+            error_msg = "Wildcard must be inserted at the end of the string.\n"
+            try:
+                clientSock.sendall(error_msg.encode())
+            except:
+                pass
+            return -1
         starIdx = wildcard.find("*")
         for u in allUsers:
             # Chars before star (if any) must match exactly

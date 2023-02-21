@@ -57,6 +57,7 @@ class TestServer(unittest.TestCase):
         good_message_2 = ["L", "t*"]
         good_message_3 = ["L", "test3"]
         good_message_4 = ["L", "*"]
+        bad_message_1 = ["L", "*st1"]
         # user enters nothing after list command
         self.assertEqual(helpers.sendUserlist(good_message_1, 1, test_dict), ["test1", "test2", "test3", "test4", "foo"])
         # user uses wildcard and characters
@@ -65,5 +66,7 @@ class TestServer(unittest.TestCase):
         self.assertEqual(helpers.sendUserlist(good_message_3, 1, test_dict), ["test3"])
         # user uses wildcard only
         self.assertEqual(helpers.sendUserlist(good_message_4, 1, test_dict), ["test1", "test2", "test3", "test4", "foo"])
+        # user uses wildcard only
+        self.assertEqual(helpers.sendUserlist(bad_message_1, 1, test_dict), -1)
 
     # TODO: Unit test for checkValidUsername()

@@ -80,10 +80,10 @@ recieved. At this point, you can list all or a subset of accounts, send a messag
 'l', 's', 'o', or 'd', respectively. Each of these operations are detailed below:
 
 i) list all accounts: You will be prompted for an optional parameter which allows you to enter in a specific username or some characters and a 
-wildcard ('*') to filter down results. If using characters and a wildcard, the wildcard must be entered after the characters. If nothing or '*' 
-is entered, a list of all users will be displayed. If a specific username is entered, it will be displayed, or an error will occur, depending 
-on if that user exists within the database. If a combination of characters and a wildcard is entered, all names which have the same characters 
-in the same positions preceding the wildcard will be returned. 
+wildcard ('*') to filter down results. If using characters and a wildcard, the wildcard must be entered after the characters. If a wildcard is 
+entered before characters, an error will occur. If nothing or '*' is entered, a list of all users will be displayed. If a specific username is 
+entered, it will be displayed, or an error will occur, depending on if that user exists within the database. If a combination of characters and 
+a wildcard is entered, all names which have the same characters in the same positions preceding the wildcard will be returned. 
 
 ii) send a message: You will be prompted for the username of the user you want to send a message to. You can only send a message to one user at 
 a time, and cannot send a message to yourself. If a username that exists within the database is entered, then you will be prompted for the message 
