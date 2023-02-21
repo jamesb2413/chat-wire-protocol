@@ -15,6 +15,12 @@ service Chat {
     // Response stream for client to receive messages from server
     rpc Listen(Username) returns (stream Payload) {}
     // rpc List(Wildcard) returns () {}
+    // Logs out user and returns a confirmation response message
+    rpc Logout(Username) returns (Payload) {}
+    // Returns True if user is logged in, False o.w. 
+    rpc IsLoggedIn(Username) returns (BoolPayload) {}
+    // Deletes user and returns a confirmation response message
+    rpc Delete(Username) returns (Payload) {}
 }
 
 message Username {
@@ -31,9 +37,14 @@ message Unreads {
 // If sent from the sender's client to the server, Payload is a message to send.
 // If sent from server to sender, Payload is sent confirmation.
 // If sent from server to recipient, Payload is sent message. 
-// Can also be error message.
+// Can also be error message or logout/delete confirmation.
 message Payload {
     string msg = 1;
+}
+
+// Used to check from the client if a user is logged in
+message BoolPayload {
+    bool boolVal = 1;
 }
 
 message SendRequest {

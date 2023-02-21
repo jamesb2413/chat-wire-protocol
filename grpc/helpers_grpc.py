@@ -1,3 +1,27 @@
+## Used in client
+# TODO: Unit test
+def isValidUsername(username):
+    usernameWords = username.split()
+    # If user inputs empty string, whitespace, or multiple words as username
+    if len(usernameWords) != 1:
+        print("Usernames can only be one word containing letters, numbers, and special characters. " 
+              "Please try again with a different username.\n")
+        return False
+    return True
+
+def existingOrNew():
+    print("Sign In: ")
+    # Determine if user has account or needs to sign up
+    existsInput = input("Do you already have an account? [Y/N] ")
+    if existsInput == 'Y' or existsInput == 'y':
+        return True
+    elif existsInput == 'N' or existsInput == 'n':
+        return False
+    else:
+        print("Invalid response. Please answer with 'Y' or 'N'.")
+        return existingOrNew()
+
+## Used in server
 # Create new user with input username. Returns (errorFlag, errorMsg).
 def addUser(username, clientDict):
     # If username is already taken, notify user and request new username
@@ -26,7 +50,7 @@ def signInExisting(username, clientDict):
                       "or create a new account with this username.\n")
     unreadsLst = userAttributes[1]
     unreadsNum = str(len(unreadsLst))
-    unreads = "You have " + unreadNum + " unread messages:\n\n"
+    unreads = "You have " + unreadsNum + " unread messages:\n\n"
     for msg in unreadsLst:
         unreads += msg + "\n\n"
     # Reset unreads queue

@@ -1,19 +1,20 @@
-import grpc
-import chat_pb2
-import chat_pb2_grpc
-import helpers 
-import helpers_grpc
 import logging
 import sys
 from _thread import *
+import time
+
+import grpc
+import chat_pb2
+import chat_pb2_grpc
+import helpers_grpc
 
 def signinLoop(stub):
-    existsBool = helpers.existingOrNew()
+    existsBool = helpers_grpc.existingOrNew()
     if existsBool:
         print("Please log in with your username")
         username = input("Username: ")
         # Username error check
-        if helpers.isValidUsername(username):
+        if helpers_grpc.isValidUsername(username):
             # Remove whitespace
             username = username.strip().lower()
             unreadsOrError = stub.SignInExisting(chat_pb2.Username(name=username))
@@ -22,7 +23,7 @@ def signinLoop(stub):
         print("\nPlease create a new username.")
         username = input("New Username: ")
         # Username error check
-        if helpers.isValidUsername(username):
+        if helpers_grpc.isValidUsername(username):
             # Remove whitespace
             username = username.strip().lower()
             unreadsOrError = stub.AddUser(chat_pb2.Username(name=username))
@@ -41,7 +42,7 @@ def messageLoop(username, stub):
         while True:
             send_to_user = input("Which user do you want to message? \n Recipient username: ")
             # Username error checks
-            if not helpers.isValidUsername(send_to_user):
+            if not helpers_grpc.isValidUsername(send_to_user):
                 continue
             if send_to_user == username: 
                 print("Cannot send message to self.\n")
@@ -54,13 +55,47 @@ def messageLoop(username, stub):
         payload = chat_pb2.Payload(msg=message)
         senderResponse = stub.Send(chat_pb2.SendRequest(sender=sender, recipient=recipient, sentMsg=payload))
         print(senderResponse.msg)
+        print("Command:")
     if command == 'L' or command == 'l':
         pass
+    if command == 'O' or command == 'o':
+        logoutResponse = stub.Logout(chat_pb2.Username(name=username))
+        print("Logging out...")
+        time.sleep(0.2)
+        print(logoutResponse.msg)
+        time.sleep(0.2)
+        return
+    if command == 'D' or command == 'd':
+        confirm = False
+        confirmInput = input("Are you sure? Deleted accounts are permanently erased, "
+                            "and you will be logged off immediately. [Y/N] ")
+        while True:
+            if confirmInput == 'Y' or confirmInput == 'y':
+                confirm = True
+                break
+            elif confirmInput == 'N' or confirmInput == 'n':
+                confirm = False
+                break
+            else:
+                print("Invalid response. Please answer with 'Y' or 'N'.")
+        if confirm:
+            deleteResponse = stub.Delete(chat_pb2.Username(name=username))
+            print("Deleting account... \n")
+            time.sleep(0.2)
+            print(deleteResponse.msg)
+            time.sleep(0.2)
+            return
+        else:
+            print("\nCommand: ")
     messageLoop(username, stub)
 
 # Listens for messages from server's Listen response stream
-def listen_thread(responseStream):
+def listen_thread(username, stub, responseStream):
     while True:
+        # Close thread if user has logged out
+        isLoggedInResponse = stub.IsLoggedIn(chat_pb2.Username(name=username))
+        if not isLoggedInResponse.boolVal:
+            return
         try:
             response = next(responseStream)
             print(response.msg)
@@ -88,7 +123,7 @@ def run():
             # Establish response stream to receive messages from server
             # responseStream is a generator of chat_pb2.Payload
             responseStream = stub.Listen(chat_pb2.Username(name=username))
-            start_new_thread(listen_thread, (responseStream,))
+            start_new_thread(listen_thread, (username, stub, responseStream))
             # Wait for input from command line
             messageLoop(username, stub)
 

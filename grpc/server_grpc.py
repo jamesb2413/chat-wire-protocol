@@ -4,7 +4,6 @@ import logging
 import grpc
 import chat_pb2
 import chat_pb2_grpc
-import helpers
 import helpers_grpc
 
 class ChatServicer(chat_pb2_grpc.ChatServicer):
@@ -33,6 +32,17 @@ class ChatServicer(chat_pb2_grpc.ChatServicer):
             if len(self.clientDict[username.name][1]) > 0:
                 # Yield first message
                 yield chat_pb2.Payload(msg=self.clientDict[username.name][1].pop(0))
+
+    def Logout(self, username, context):
+        self.clientDict[username.name][0] = False
+        return chat_pb2.Payload(msg="Goodbye!\n")
+    
+    def IsLoggedIn(self, username, context):
+        return chat_pb2.BoolPayload(boolVal=self.clientDict[username.name][0])
+
+    def Delete(self, username, context):
+        clientDict.pop(username.name)
+        return chat_pb2.Payload(msg="Goodbye!\n")
 
 
 def serve():
