@@ -3,22 +3,73 @@ Engineering Notebook
 -----------------------------------------------------------------------------------------------------------------------------------------------
 Progress: Getting started
 
-We didn't have any experience with programming with sockets or distributed systems, so we looked to the internet to read the documentation about 
-sockets: https://docs.python.org/3/library/socket.html
+We didn't have any experience with programming with sockets or distributed systems, so we looked to the internet to read the Python sockets 
+documentation: https://docs.python.org/3/library/socket.html
 
-And looked at some code for a basic chatroom implementation using the socket library, which wasn't exactly what we wanted, but gave us a 
+We looked at this blog's code for a broadcasting implementation using the socket library, which wasn't exactly what we wanted, but gave us a 
 jumping off point for some of the basic architecture for our client/server chat: https://www.geeksforgeeks.org/simple-chat-room-using-python/
 
-At this point, we were able to connect multiple clients to the server across multiple machines, and we could send messages to the server which 
-would be displayed to all other clients that were connected.
+Using these resources, we wrote our custom client and server modules, which were able to connect multiple clients to the server across 
+multiple machines.
 
 -----------------------------------------------------------------------------------------------------------------------------------------------
-Progress: Basic functionality, wire protocol implementation
+Progress: Basic functionality and wire protocol implementation
 
 Now that we built the basic architecture for the server, we could start adding some of the additional features that we were going to need. We 
 implemented one-to-one communication, listing all clients, login/out, and deleting accounts. This required implementing our own wire protocol, 
-which consisted of different strings being constructed based on which operation the client wanted to execute. On the server side, we created a 
-function to parse incoming strings from the client, and execute different branches of the code based on the content of the strings.
+which consisted in inserting 'code characters' at the beginning of messages between the client and server. By explicitly defining our wire protocol
+such that our client and server modules agreed upon these code characters a priori, we ensured that the recipient could decode the sender's 
+intention by parsing the code character in the message. On the server side, we created a function to parse incoming strings from the client, and 
+execute different branches of the code based on the content of the strings. Similarly, we used the same parsing mechanism on the client side,
+but this was only needed in one isolated scenario, namely when there was a log in error detected by the server. 
+
+In detail, our custom wire protocol is specified as follows:
+Since this is a simple application, we felt comfortable using a simple and primitive wire protocol, since it is easy to exhaustively specify
+the server's behavior over all possible scenarios. In more complex applications, it would probably be more prudent to carefully plan out a 
+wire protocol before and during implementation so that a more general method is divised according to necessary time and space constraints.
+Messages from client to server and vice versa are sent using UTF-8 character encoding, with semantically-meaningful units delimited with spaces.
+
+For messages from client to server, the encoded string stores a code character, followed by the payload of the message. 
+The code characters encode the operation which the client wants the server to execute:
+'I' - The client wants to sign in to their account. 
+'S' - The client wants to send a message to another user.
+'L' - The client wants to list all users matching the given parameter.
+'O' - The client wants to log out of their account.
+'D' - The client wants to delete their account.
+
+By parsing between these possible code characters, the server determines which operation to perform. Each operation has its own payload structure,
+so the code characters also tell the server how to parse the rest of the message. 
+Payload structures:
+'I' - The sign in payload is divided into a sign in type code ('E' for existing accounts and 'N' for new accounts) and a username. 
+      The server parses the sign in type code to determine how to handle the login. For example, a complete message from the client
+      might be "I E my_username".encode(), meaning, "my_username is signing in as an existing user."
+'S' - The send payload is divided into the sending username, the recipient username, and the message. For example, a complete message
+      from a client logged in as user_a might be "S user_a user_b Hello user_b! From, user_a".encode(), meaning, "user_a wants to send the following
+      message to user_b: 'Hello user_b! From, user_a'."
+'L' - The list payload is simply the optional text wildcard parameter. For example, a complete message from a client might be
+      "L a*a".encode(), meaning, "list all users whose username starts and ends with 'a'." If no wildcard parameter is sent,
+      the server knows to list all users.
+'O' - The logout payload is simply the username to be logged out, so an example complete message is "O user_a".encode(), meaning, "log out user_a."
+'D' - The delete payload is also simply the username to be deleted, so an example complete message is "D user_a".encode(), meaning, "delete user_a."
+
+For messages from server to client, in most scenarios, the message sent from the server is immediately printed by the client. Therefore,
+we simple send the UTF-8 encoding of the desired message. In only one case, we use the same wire protocol as above. In the case of errors
+during signin, the server sends the same 'I' code back to the client to signal a signin error. Since every successful signin results in the same
+message sent from the client to the server, "You have " + unreadNum + " unread messages:", followed by all unread messages (if any), our client
+could parse for the 'I' character to differentiate between successful signins and signin errors. In the case of the signin error, the payload is
+simply the error message which is printed to the user.
+
+Important data structures:
+All user information for the custom wire protocol app is stored on the server in a clientDict dictionary, with the following structure:
+
+{ username : [socketObj, loggedOn (bool), messageQueue] }
+
+For each user, a list is stored with the client socket object where the user most recently logged on, a boolean signifying whether the user is 
+currently logged on, and a queue of all messages the user has received while logged off, if any. We initially used client socket objects as keys
+in this dictionary, but had to refactor our code after encountering a bug when logging out and deleting users who share client socket objects 
+with other users. This bug is detailed below.
+
+
 
 -----------------------------------------------------------------------------------------------------------------------------------------------
 Refactor: Modularizing the code
@@ -36,20 +87,19 @@ end of a string to specify to the server that they want it to list all users whi
 -----------------------------------------------------------------------------------------------------------------------------------------------
 Major Bug: Using socket object as unique client identifier
 
-We initially maintained a global dictionary which stores client information. The key is the username, and the value associated with each key is
-a list, with the first item being the socket object associated with that client, the second being a boolean which indicates if that user is 
-currently logged in, and the third being an initially empty list which stores messages sent to that user if they are logged out. We tried using 
-the socket object as the unique identifier for each user, however there was a bug that could occur by using this method. A client could create an 
-account/login to their existing account, log out, and create a new account (logging them in again) all from the same terminal. At this point, if 
-they logged out again, the logOut function would look for their socket object, find it on the first user (that was already logged out) and set 
-their login status to False, subsequently disconnecting the user from the server. Now, if that user tried logging back into their second account, 
-the dictionary would still have them recorded as logged in, and so it would return an error back to that client that the user they were trying to 
-log in to is already logged in. At this point the bug is clear--the second account was locked out, and the only way to fix this would be to 
-reboot the server entirely. 
+We initially maintained a global dictionary which stores client socket objects as keys and usernames as values, rather than the other way around.
+We tried using the socket object as the unique identifier for each user, however there was a bug that could occur by using this method. A client 
+could create an account/login to their existing account, log out, and create a new account (logging them in again) all from the same terminal. 
+At this point, if they logged out again, the logOut function would look for their socket object, find it on the first user (that was already 
+logged out) and set the wrong user's login status to False, subsequently disconnecting the user from the server. Now, if that user tried logging 
+back into their account, the dictionary would still have them recorded as logged in, and so it would return an error back to that client that the 
+user they were trying to log in as is already logged in. At this point the bug is clear--the second account was locked out, and the only way to 
+fix this would be to reboot the server entirely. 
 
 In order to fix this bug, we needed to refactor the code to store the username associated with a given client on the client side as well, and 
-send it to the server whenever the client issued a command. This works because each username paired with its corresponding socket object tuple 
-is unique, and thus can be used to logout a user confidenly without worrying about lockout issues. 
+send it to the server whenever the client issued a command. This works because each username is unique, while corresponding socket objects are not.
+Thus, usernames must be used to logout and delete users, rather than their socket objects in order to prevent lockout issues for other users who
+share the same socket object. 
 
 -----------------------------------------------------------------------------------------------------------------------------------------------
 Progress: Unit tests
@@ -63,3 +113,12 @@ unittest tutorial: https://www.youtube.com/watch?v=6tNS--WetLI
 -----------------------------------------------------------------------------------------------------------------------------------------------
 Progress: gRPC implementation
 
+The gRPC code is much more clean and readable because the RPC functionality does away with the need for a custom wire protocol. It took a long time
+to implement because we were unfamiliar with gRPC, but after figuring out the system, it would probably be much easier and faster in the future
+to code a client/server application using gRPC compared with designing a custom wire protocol. In particular, it was difficult to determine how 
+to implement message send functionality, since a simple RPC cannot indefinitely poll for incoming messages from the server. Instead, we used a 
+response-streaming RPC, which is started by a client request which sends a username to the server, then polls in a thread for incoming messages.
+
+// To do: 1. More detailed code complexity comparison
+// 2. Performance comparison
+// 3. Buffer size comparison

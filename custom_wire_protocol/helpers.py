@@ -49,7 +49,7 @@ def signIn(message, clientSock, clientDict):
     # From clientDict: [socketObj, loggedOnBool, messageQueue]
     userAttributes = []
 
-    if message[1] == "Existing":
+    if message[1] == "E":
         try:
             userAttributes = clientDict[username]
             # If user is already logged in, deny access

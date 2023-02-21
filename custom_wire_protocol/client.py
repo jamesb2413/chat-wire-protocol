@@ -33,11 +33,11 @@ def signinLoop():
     if existsBool:
         print("Please log in with your username")
         username = input("Username: ")
-        message = "I Existing "
+        message = "I E "
     else:
         print("\nPlease create a new username.")
         username = input("New Username: ")
-        message = "I New "
+        message = "I N "
     # Username error check
     if helpers.isValidUsername(username):
         # Remove whitespace
