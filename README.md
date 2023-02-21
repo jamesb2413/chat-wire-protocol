@@ -1,5 +1,6 @@
 # chat-wire-protocol
 In /custom_wire_protocol: A simple client/server chat application implemented with a custom wire protocol
+
 In /grpc: A simple client/server chat application implemented using gRPC
 
 Sections:
