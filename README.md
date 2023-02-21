@@ -34,7 +34,8 @@ Now, you should have all of the files necessary to run the applications. There a
 programs. You will need the socket library in addition to the unittest library to run the tests, both of which are built into the standard python 
 library.
 
-// section about gRPC setup
+gRPC install and setup instructions can be found in the gRPC documentation Python Quick Start guide: 
+https://grpc.io/docs/languages/python/quickstart/. This will require installation of grpcio and grpcio-tools using pip or anaconda.
 
 -----------------------------------------------------------------------------------------------------------------------------------------------
 2. Startup
