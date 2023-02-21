@@ -30,7 +30,7 @@ class ChatStub(object):
                 request_serializer=chat__pb2.SendRequest.SerializeToString,
                 response_deserializer=chat__pb2.Payload.FromString,
                 )
-        self.Listen = channel.stream_stream(
+        self.Listen = channel.unary_stream(
                 '/chat.Chat/Listen',
                 request_serializer=chat__pb2.Username.SerializeToString,
                 response_deserializer=chat__pb2.Payload.FromString,
@@ -64,8 +64,8 @@ class ChatServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def Listen(self, request_iterator, context):
-        """Bidirectional stream for client to receive messages from server
+    def Listen(self, request, context):
+        """Response stream for client to receive messages from server
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -89,7 +89,7 @@ def add_ChatServicer_to_server(servicer, server):
                     request_deserializer=chat__pb2.SendRequest.FromString,
                     response_serializer=chat__pb2.Payload.SerializeToString,
             ),
-            'Listen': grpc.stream_stream_rpc_method_handler(
+            'Listen': grpc.unary_stream_rpc_method_handler(
                     servicer.Listen,
                     request_deserializer=chat__pb2.Username.FromString,
                     response_serializer=chat__pb2.Payload.SerializeToString,
@@ -157,7 +157,7 @@ class Chat(object):
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
     @staticmethod
-    def Listen(request_iterator,
+    def Listen(request,
             target,
             options=(),
             channel_credentials=None,
@@ -167,7 +167,7 @@ class Chat(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.stream_stream(request_iterator, target, '/chat.Chat/Listen',
+        return grpc.experimental.unary_stream(request, target, '/chat.Chat/Listen',
             chat__pb2.Username.SerializeToString,
             chat__pb2.Payload.FromString,
             options, channel_credentials,

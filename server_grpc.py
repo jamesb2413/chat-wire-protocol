@@ -10,6 +10,7 @@ import helpers_grpc
 class ChatServicer(chat_pb2_grpc.ChatServicer):
 
     def __init__(self):
+        # {username : [loggedOnBool, [messageQueue]]}
         self.clientDict = {}
 
     def SignInExisting(self, username, context):
@@ -26,9 +27,9 @@ class ChatServicer(chat_pb2_grpc.ChatServicer):
         return chat_pb2.Payload(msg=response)
 
     # usernameStream only comes from logged-in user
-    def Listen(self, usernameStream, context):
-        for username in usernameStream:
-            # Message queued
+    def Listen(self, username, context):
+        while True:
+            # If any messages are queued
             if len(self.clientDict[username.name][1]) > 0:
                 # Yield first message
                 yield chat_pb2.Payload(msg=self.clientDict[username.name][1].pop(0))

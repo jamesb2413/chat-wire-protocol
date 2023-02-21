@@ -12,8 +12,8 @@ service Chat {
     rpc AddUser(Username) returns (Unreads) {}
     // Sends message to recipient with Username
     rpc Send(SendRequest) returns (Payload) {}
-    // Bidirectional stream for client to receive messages from server
-    rpc Listen(stream Username) returns (stream Payload) {}
+    // Response stream for client to receive messages from server
+    rpc Listen(Username) returns (stream Payload) {}
     // rpc List(Wildcard) returns () {}
 }
 

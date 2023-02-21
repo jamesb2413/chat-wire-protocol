@@ -4,6 +4,8 @@ import chat_pb2_grpc
 import helpers 
 import helpers_grpc
 import logging
+import sys
+from _thread import *
 
 def signinLoop(stub):
     existsBool = helpers.existingOrNew()
@@ -27,14 +29,13 @@ def signinLoop(stub):
             eFlag, msg = unreadsOrError.errorFlag, unreadsOrError.unreads
     if eFlag:
         print(msg)
-        return signinLoop()
+        return signinLoop(stub)
     else:
         print("\nCongratulations! You have successfully logged in to your account.\n")
         print(msg)
         return username
 
 def messageLoop(username, stub):
-    serverStream(stub)
     command = sys.stdin.readline().strip()
     if command == 'S' or command == 's':
         while True:
@@ -48,17 +49,23 @@ def messageLoop(username, stub):
             break
         message = input("Type the message you would like to send. \n Message: ")
         # Send sender username, recipient username, and message to the server & store confirmation response
-        senderResponse = stub.Send(chat_pb2.Username(name=username), 
-                                   chat_pb2.Username(name=send_to_user), 
-                                   chat_pb2.RequestMessage(payload=message))
+        sender = chat_pb2.Username(name=username)
+        recipient = chat_pb2.Username(name=send_to_user)
+        payload = chat_pb2.Payload(msg=message)
+        senderResponse = stub.Send(chat_pb2.SendRequest(sender=sender, recipient=recipient, sentMsg=payload))
         print(senderResponse.msg)
     if command == 'L' or command == 'l':
         pass
     messageLoop(username, stub)
-def usernameStream(username):
+
+# Listens for messages from server's Listen response stream
+def listen_thread(responseStream):
     while True:
-        yield chat_pb2.Username(name=username)
-        
+        try:
+            response = next(responseStream)
+            print(response.msg)
+        except:
+            continue
 
 def run():
     with grpc.insecure_channel('localhost:50051') as channel:
@@ -71,8 +78,6 @@ def run():
             # Check: Will there be problems if a message arrives between login and beginning of while loop?
             print("If any messages arrive while you are logged in, they will be immediately displayed.\n")
             print("Use the following commands to interact with the chat app: \n")
-            # if numMessages > 0:
-                # print("R: Read new messages")
             print(" -----------------------------------------------")
             print("|L: List all accounts that exist on this server.|")
             print("|S: Send a message to another user.             |")
@@ -80,13 +85,12 @@ def run():
             print("|D: Delete account.                             |")
             print(" ----------------------------------------------- \n")
             print("Command: ")
-            # Establish bi-directional stream to receive messages from server
-            responseStream = stub.Listen(usernameStream(username))
+            # Establish response stream to receive messages from server
+            # responseStream is a generator of chat_pb2.Payload
+            responseStream = stub.Listen(chat_pb2.Username(name=username))
+            start_new_thread(listen_thread, (responseStream,))
             # Wait for input from command line
             messageLoop(username, stub)
-        
-
-        # response = stub.SayHello(helloworld_pb2.HelloRequest(name='you'))
 
 
 if __name__ == '__main__':
