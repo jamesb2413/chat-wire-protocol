@@ -36,6 +36,10 @@ class ChatServicer(chat_pb2_grpc.ChatServicer):
             if self.clientDict[username.name][0] == False:
                 break
 
+    def List(self, wildcard, context):
+        payload = helpers_grpc.sendUserlist(wildcard.msg, self.clientDict)
+        return chat_pb2.Payload(msg=payload)
+
     def Logout(self, username, context):
         self.clientDict[username.name][0] = False
         return chat_pb2.Payload(msg="Goodbye!\n")
