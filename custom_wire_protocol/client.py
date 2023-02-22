@@ -64,19 +64,20 @@ def signinLoop():
                 return username
 
 # Parse input from either command line or server and do the correct action
+# Loops until logout or delete
 def messageLoop(username):
     read_socks, _, _ = select.select(socks_list,[],[]) 
 
     for read_sock in read_socks: 
-        # Incoming message
+        # Incoming message from server
         if read_sock == s: 
             message = read_sock.recv(2048).decode()
             print(message) 
             print("Command:")
-            # TODO: close user connection, terminate program if server sends back that account was deleted
         # Input from user
         else: 
             command = sys.stdin.readline().strip()
+            # User wants to send a message
             if command == 'S' or command == 's':
                 while True:
                     send_to_user = input("Which user do you want to message? \n Recipient username: ")
@@ -90,6 +91,7 @@ def messageLoop(username):
                 message = input("Type the message you would like to send. \n Message: ")
                 complete_msg = "S " + username + " " + send_to_user + " " + message
                 s.send(complete_msg.encode())
+            # User wants to list users
             if command == 'L' or command == 'l':
                 complete_msg = "L "
                 wildcard = input("Optional text wildcard: ")
@@ -98,6 +100,7 @@ def messageLoop(username):
                 complete_msg += wildcard
                 s.send(complete_msg.encode())
                 print("Fetching users... \n")
+            # User wants to delete account
             if command == 'D' or command == 'd':
                 confirm = False
                 confirmInput = input("Are you sure? Deleted accounts are permanently erased, "
@@ -121,6 +124,7 @@ def messageLoop(username):
                     return
                 else:
                     print("\nCommand: ")
+            # User wants to log out
             if command == 'O' or command == 'o':
                 complete_msg = "O " + username
                 s.send(complete_msg.encode())
@@ -135,7 +139,6 @@ def messageLoop(username):
 while True: 
     username = signinLoop()
     # Now, the user is logged in. Notify the user of possible functions
-    # Check: Will there be problems if a message arrives between login and beginning of while loop?
     print("If any messages arrive while you are logged in, they will be immediately displayed.\n")
     print("Use the following commands to interact with the chat app: \n")
     print(" -----------------------------------------------")

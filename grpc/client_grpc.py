@@ -8,8 +8,10 @@ import chat_pb2
 import chat_pb2_grpc
 import helpers_grpc
 
+# Loops until a valid sign in. Returns username of signed in user.
 def signinLoop(stub):
     existsBool = helpers_grpc.existingOrNew()
+    # Try to sign in existing user
     if existsBool:
         print("Please log in with your username")
         username = input("Username: ")
@@ -19,6 +21,7 @@ def signinLoop(stub):
             username = username.strip().lower()
             unreadsOrError = stub.SignInExisting(chat_pb2.Username(name=username))
             eFlag, msg = unreadsOrError.errorFlag, unreadsOrError.unreads
+    # Try to sign in new user
     else:
         print("\nPlease create a new username.")
         username = input("New Username: ")
@@ -36,8 +39,10 @@ def signinLoop(stub):
         print(msg)
         return username
 
+# Parse input from command line and do the correct action. Loops until logout or delete.
 def messageLoop(username, stub):
     command = sys.stdin.readline().strip()
+    # User wants to send a message
     if command == 'S' or command == 's':
         while True:
             send_to_user = input("Which user do you want to message? \n Recipient username: ")
@@ -56,6 +61,7 @@ def messageLoop(username, stub):
         senderResponse = stub.Send(chat_pb2.SendRequest(sender=sender, recipient=recipient, sentMsg=payload))
         print(senderResponse.msg)
         print("Command:")
+    # User wants to list users
     if command == 'L' or command == 'l':
         wildcard = input("Optional text wildcard: ")
         if wildcard == "":
@@ -64,6 +70,7 @@ def messageLoop(username, stub):
         print("Fetching users... \n")
         print(listResponse.msg)
         print("Command:")
+    # User wants to log out
     if command == 'O' or command == 'o':
         logoutResponse = stub.Logout(chat_pb2.Username(name=username))
         print("Logging out...")
@@ -71,6 +78,7 @@ def messageLoop(username, stub):
         print(logoutResponse.msg)
         time.sleep(0.2)
         return
+    # User wants to delete account
     if command == 'D' or command == 'd':
         confirm = False
         confirmInput = input("Are you sure? Deleted accounts are permanently erased, "
@@ -95,7 +103,7 @@ def messageLoop(username, stub):
             print("\nCommand: ")
     messageLoop(username, stub)
 
-# Listens for messages from server's Listen response stream
+# Listens for messages from server's Listen response stream. Closes when user logs out or deletes acct.
 def listen_thread(username, stub, responseStream):
     while True:
         try:
@@ -114,7 +122,6 @@ def run():
         while True:
             username = signinLoop(stub)
             # Now, the user is logged in. Notify the user of possible functions
-            # Check: Will there be problems if a message arrives between login and beginning of while loop?
             print("If any messages arrive while you are logged in, they will be immediately displayed.\n")
             print("Use the following commands to interact with the chat app: \n")
             print(" -----------------------------------------------")
@@ -124,8 +131,8 @@ def run():
             print("|D: Delete account.                             |")
             print(" ----------------------------------------------- \n")
             print("Command: ")
-            # Establish response stream to receive messages from server
-            # responseStream is a generator of chat_pb2.Payload
+            # Establish response stream to receive messages from server.
+            # responseStream is a generator of chat_pb2.Payload objects.
             responseStream = stub.Listen(chat_pb2.Username(name=username))
             start_new_thread(listen_thread, (username, stub, responseStream))
             # Wait for input from command line
