@@ -112,7 +112,7 @@ def sendMsg(message, clientSock, clientDict):
             clientSock.sendall(error_handle.encode())
         except:
             pass
-        return -2
+        return -1
 
     # Send message to recipient
     try:

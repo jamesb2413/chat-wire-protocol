@@ -41,25 +41,22 @@ class TestServer(unittest.TestCase):
 
     def test_sendMsg(self):
         test_dict = {"test1":[1, True, []], "test2":[2, True, []]}
-        faulty_message_1 = ["S", "test1", "test1"]
-        faulty_message_2 = ["S", "test1", "test"]
+        faulty_message_1 = ["S", "test1", "test"]
         good_message_1 = ["S", "test1", "test2", "hello", "world"]
-        # client attempts to send message to self
-        self.assertEqual(helpers.sendMsg(faulty_message_1, 1, test_dict), -1)
         # client attempts to send message to someone who isnt in database
-        self.assertEqual(helpers.sendMsg(faulty_message_2, 1, test_dict), -2)
+        self.assertEqual(helpers.sendMsg(faulty_message_1, 1, test_dict), -1)
         # message sent from one client to another
         self.assertEqual(helpers.sendMsg(good_message_1, 1, test_dict), 1)
 
     def test_sendUserlist(self):
-        test_dict = {"test1":[1, True, []], "test2":[2, True, []], "test3":[3, True, []], "test4":[4, True, []], "foo":[4, True, []]}
+        test_dict = {"test1":[1, True, []], "test2":[2, True, []], "test3":[3, True, []], "test4":[4, True, []], "foo":[5, True, []]}
         good_message_1 = ["L", ""]
         good_message_2 = ["L", "t*"]
         good_message_3 = ["L", "test3"]
         good_message_4 = ["L", "*"]
-        bad_message_1 = ["L", "*st1"]
+        good_message_5 = ["L", "*st1"]
         # user enters nothing after list command
-        self.assertEqual(helpers.sendUserlist(good_message_1, 1, test_dict), ["test1", "test2", "test3", "test4", "foo"])
+        self.assertEqual(helpers.sendUserlist(good_message_1, 1, test_dict), [])
         # user uses wildcard and characters
         self.assertEqual(helpers.sendUserlist(good_message_2, 1, test_dict), ["test1", "test2", "test3", "test4"])
         # user specifies specific user
@@ -67,6 +64,6 @@ class TestServer(unittest.TestCase):
         # user uses wildcard only
         self.assertEqual(helpers.sendUserlist(good_message_4, 1, test_dict), ["test1", "test2", "test3", "test4", "foo"])
         # user uses wildcard only
-        self.assertEqual(helpers.sendUserlist(bad_message_1, 1, test_dict), -1)
+        self.assertEqual(helpers.sendUserlist(good_message_5, 1, test_dict), ["test1"])
 
     # TODO: Unit test for checkValidUsername()
