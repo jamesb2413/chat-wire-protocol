@@ -100,14 +100,6 @@ def sendMsg(message, clientSock, clientDict):
     # Error handling message 
     error_handle = "Error sending message to " + recipient + ": "
 
-    if sender == recipient:
-        error_handle += "Cannot send message to self.\n"
-        try:
-            clientSock.sendall(error_handle.encode())
-        except:
-            pass
-        return -1
-
     raw_msg = " ".join(message[3:])
 
     # Get recipient data
