@@ -4,12 +4,6 @@ from typing import ClassVar as _ClassVar, Mapping as _Mapping, Optional as _Opti
 
 DESCRIPTOR: _descriptor.FileDescriptor
 
-class BoolPayload(_message.Message):
-    __slots__ = ["boolVal"]
-    BOOLVAL_FIELD_NUMBER: _ClassVar[int]
-    boolVal: bool
-    def __init__(self, boolVal: bool = ...) -> None: ...
-
 class Payload(_message.Message):
     __slots__ = ["msg"]
     MSG_FIELD_NUMBER: _ClassVar[int]

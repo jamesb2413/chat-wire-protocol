@@ -92,15 +92,11 @@ def messageLoop(username, stub):
 # Listens for messages from server's Listen response stream
 def listen_thread(username, stub, responseStream):
     while True:
-        # Close thread if user has logged out
-        isLoggedInResponse = stub.IsLoggedIn(chat_pb2.Username(name=username))
-        if not isLoggedInResponse.boolVal:
-            return
         try:
             response = next(responseStream)
             print(response.msg)
         except:
-            continue
+            return
 
 def run():
     with grpc.insecure_channel('localhost:50051') as channel:

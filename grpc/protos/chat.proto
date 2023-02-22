@@ -17,8 +17,6 @@ service Chat {
     // rpc List(Wildcard) returns () {}
     // Logs out user and returns a confirmation response message
     rpc Logout(Username) returns (Payload) {}
-    // Returns True if user is logged in, False o.w. 
-    rpc IsLoggedIn(Username) returns (BoolPayload) {}
     // Deletes user and returns a confirmation response message
     rpc Delete(Username) returns (Payload) {}
 }
@@ -40,11 +38,6 @@ message Unreads {
 // Can also be error message or logout/delete confirmation.
 message Payload {
     string msg = 1;
-}
-
-// Used to check from the client if a user is logged in
-message BoolPayload {
-    bool boolVal = 1;
 }
 
 message SendRequest {

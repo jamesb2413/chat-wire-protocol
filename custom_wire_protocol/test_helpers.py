@@ -20,12 +20,12 @@ class TestServer(unittest.TestCase):
     
     def test_signIn(self):
         test_dict = {"test1":[1, True, []], "test2":[2, False, []]}
-        faulty_message_1 = ["I", "Existing"]
-        faulty_message_2 = ["I", "Existing", "test1"]
-        faulty_message_3 = ["I", "Existing", "test3"]
-        faulty_message_4 = ["I", "New", "test1"]
-        good_message_1 = ["I", "Existing", "test2"]
-        good_message_2 = ["I", "New", "test3"]
+        faulty_message_1 = ["I", "E"]
+        faulty_message_2 = ["I", "E", "test1"]
+        faulty_message_3 = ["I", "E", "test3"]
+        faulty_message_4 = ["I", "N", "test1"]
+        good_message_1 = ["I", "E", "test2"]
+        good_message_2 = ["I", "N", "test3"]
         # login attempt to existing user, no username provided
         self.assertEqual(helpers.signIn(faulty_message_1, 1, test_dict), -1)
         # login attempt to existing user, user already logged in

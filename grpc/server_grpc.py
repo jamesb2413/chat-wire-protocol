@@ -32,16 +32,16 @@ class ChatServicer(chat_pb2_grpc.ChatServicer):
             if len(self.clientDict[username.name][1]) > 0:
                 # Yield first message
                 yield chat_pb2.Payload(msg=self.clientDict[username.name][1].pop(0))
+            # Stop stream if user logs out
+            if self.clientDict[username.name][0] == False:
+                break
 
     def Logout(self, username, context):
         self.clientDict[username.name][0] = False
         return chat_pb2.Payload(msg="Goodbye!\n")
-    
-    def IsLoggedIn(self, username, context):
-        return chat_pb2.BoolPayload(boolVal=self.clientDict[username.name][0])
 
     def Delete(self, username, context):
-        clientDict.pop(username.name)
+        self.clientDict.pop(username.name)
         return chat_pb2.Payload(msg="Goodbye!\n")
 
 
