@@ -1,7 +1,7 @@
 Engineering Notebook
 
 -----------------------------------------------------------------------------------------------------------------------------------------------
-Progress: Getting started
+Getting started
 
 We didn't have any experience with programming with sockets or distributed systems, so we looked to the internet to read the Python sockets 
 documentation: https://docs.python.org/3/library/socket.html
@@ -13,7 +13,7 @@ Using these resources, we wrote our custom client and server modules, which were
 multiple machines.
 
 -----------------------------------------------------------------------------------------------------------------------------------------------
-Progress: Basic functionality and wire protocol implementation
+Basic functionality and wire protocol implementation
 
 Now that we built the basic architecture for the server, we could start adding some of the additional features that we were going to need. We 
 implemented one-to-one communication, listing all clients, login/out, and deleting accounts. This required implementing our own wire protocol, 
@@ -27,7 +27,7 @@ In detail, our custom wire protocol is specified as follows:
 Since this is a simple application, we felt comfortable using a simple and primitive wire protocol, since it is easy to exhaustively specify
 the server's behavior over all possible scenarios. In more complex applications, it would probably be more prudent to carefully plan out a 
 wire protocol before and during implementation so that a more general method is divised according to necessary time and space constraints.
-Messages from client to server and vice versa are sent using UTF-8 character encoding, with semantically-meaningful units delimited with spaces.
+Messages from client to server and vice versa are sent using UTF-8 character encoding, with semantically meaningful units delimited with spaces.
 
 For messages from client to server, the encoded string stores a code character, followed by the payload of the message. 
 The code characters encode the operation which the client wants the server to execute:
@@ -79,7 +79,7 @@ with all of the helper functions stored inside a helper class. This makes both t
 easier to debug or change if necessary.
 
 -----------------------------------------------------------------------------------------------------------------------------------------------
-Progress: List function wildcard character
+List function wildcard character
 
 After realizing we misread the spec for the "list" functionality, we added wildcard support, which allowed a user to use the "*" character at the 
 end of a string to specify to the server that they want it to list all users which start with the characters which appear before it.
@@ -102,7 +102,7 @@ Thus, usernames must be used to logout and delete users, rather than their socke
 share the same socket object. 
 
 -----------------------------------------------------------------------------------------------------------------------------------------------
-Progress: Unit tests
+Unit tests
 
 Now that the custom wire protocol implementation was mostly up and running, we created unit tests using python's unittest library. We learned 
 more about how to write unit tests and how to write good unit tests using the resources below:
@@ -111,7 +111,7 @@ unittest documentation: https://docs.python.org/3/library/unittest.html
 unittest tutorial: https://www.youtube.com/watch?v=6tNS--WetLI
 
 -----------------------------------------------------------------------------------------------------------------------------------------------
-Progress: gRPC implementation
+gRPC implementation
 
 The gRPC code is much more clean and readable because the RPC functionality does away with the need for a custom wire protocol. It took a long time
 to implement because we were unfamiliar with gRPC, but after figuring out the system, it would probably be much easier and faster in the future
@@ -119,6 +119,14 @@ to code a client/server application using gRPC compared with designing a custom 
 to implement message send functionality, since a simple RPC cannot indefinitely poll for incoming messages from the server. Instead, we used a 
 response-streaming RPC, which is started by a client request which sends a username to the server, then polls in a thread for incoming messages.
 
-// To do: 1. More detailed code complexity comparison
-// 2. Performance comparison
-// 3. Buffer size comparison
+In our gRPC implementation, protobuf strings are encoded down to a specific byte sequence. Therefore, the buffer size in the gRPC implementation is 
+significantly smaller than in the custom wire protocol implementation because a few bytes encode an entire string, rather than requiring
+transfer of verbose UTF-8 encoding over the wire. Further, there are fewer communications between the client and server in the gRPC implementation 
+because different data types can be passed in one protocol buffer, while in the custom wire protocol implementation, different data types
+would have to be passed over the wire as a string, then parsed into the correct data type.
+
+Since the protocol buffers are transferred more quickly than strings, the gRPC implementation also has significantly better performance than the 
+custom wire protocol implementation. Also, the gRPC implementation has faster and more elegant algorithmic design because the RPC architecture
+leads to a more natural procedural semantic flow, compared to the custom wire protocol, which required switching between the client and server on 
+an ad-hoc basis as needed, leading to a more chaotic and unorganized semantic flow. This difference also results in significantly better performance
+for the gRPC implementation, compared to the custom wire protocol implementation.
