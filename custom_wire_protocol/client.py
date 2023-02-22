@@ -9,6 +9,7 @@ import select
 import time
 import helpers
 
+# Get the desired IP and port from the user
 ip = ''
 port = -1
 if len(sys.argv) != 3: 
@@ -18,25 +19,27 @@ if len(sys.argv) != 3:
 else:
     ip = str(sys.argv[1]) 
     port = int(sys.argv[2]) 
-# create an INET, STREAMing socket
+# Create an INET, STREAMing socket
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-# connect to the server at the given IP address and port
+# Connect to the server at the given IP address and port
 s.connect((ip, port))
 socks_list = [sys.stdin, s] 
 read_socks = []
 
 print("Congratulations! You have connected to the chat server.\n")
 
-# Loops requesting user input until a valid sign in. Returns valid username
+# Loops until a valid sign in. Returns username of signed in user.
 def signinLoop():
     existsBool = helpers.existingOrNew()
     if existsBool:
         print("Please log in with your username")
         username = input("Username: ")
+        # Signal to server that an EXISTING user is signing in
         message = "I E "
     else:
         print("\nPlease create a new username.")
         username = input("New Username: ")
+        # Signal to server that a NEW user is signing in
         message = "I N "
     # Username error check
     if helpers.isValidUsername(username):
@@ -45,13 +48,11 @@ def signinLoop():
         message += username
         s.send(message.encode())
         time.sleep(0.1)
-        # Catch errors: Existing: (1) account does not exist, (2) account already logged in elsewhere
-        # New: Username already in use by a different account
         read_socks, _, _ = select.select(socks_list,[],[]) 
         for read_sock in read_socks: 
             message = read_sock.recv(2048).decode()
             messageSplit = message.split(' ', 1)
-            # Error message from server
+            # Catch error message from server
             if messageSplit[0] == "I":
                 print(messageSplit[1])
                 return signinLoop()

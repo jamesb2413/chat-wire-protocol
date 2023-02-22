@@ -52,7 +52,7 @@ def signIn(message, clientSock, clientDict):
     if message[1] == "E":
         try:
             userAttributes = clientDict[username]
-            # If user is already logged in, deny access
+            # If user is already logged in, deny access and send error message
             if userAttributes[1] == True:
                 doubleLogAlert = ("I This user is already logged in on another device. Please " 
                                   "log out in the other location and try again.\n")
@@ -66,7 +66,7 @@ def signIn(message, clientSock, clientDict):
                 userAttributes[1] = True
                 userAttributes[0] = clientSock
         except:
-            # If account does not exist
+            # If account does not exist, send error message
             dneAlert = ("I No users exist with this username. Please double check that you typed correctly "
                         "or create a new account with this username.\n")
             try:
