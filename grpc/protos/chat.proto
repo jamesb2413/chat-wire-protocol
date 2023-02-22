@@ -14,7 +14,8 @@ service Chat {
     rpc Send(SendRequest) returns (Payload) {}
     // Response stream for client to receive messages from server
     rpc Listen(Username) returns (stream Payload) {}
-    // rpc List(Wildcard) returns () {}
+    // Lists all usernames that match the optional text wildcard
+    rpc List(Payload) returns (Payload) {}
     // Logs out user and returns a confirmation response message
     rpc Logout(Username) returns (Payload) {}
     // Deletes user and returns a confirmation response message

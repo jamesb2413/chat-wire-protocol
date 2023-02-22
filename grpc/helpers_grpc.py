@@ -83,36 +83,39 @@ def sendMsg(sender, recipient, message, clientDict):
         error_handle += "Recipient connection error"
         return error_handle
     
-def sendUserlist(message, clientSock, clientDict):
-    wildcard = message[1]
-    matches, res = list(clientDict.keys()), list(clientDict.keys())
-
-    # return list of all users
-    if wildcard == "":
-        pass
+def sendUserlist(wildcard, clientDict):
+    allUsers, matches = list(clientDict.keys()), list(clientDict.keys())
 
     # return list of qualifying users
-    elif "*" in wildcard:
+    if "*" in wildcard:
         starIdx = wildcard.find("*")
-        for u in matches:
+        for u in allUsers:
+            # Chars before star (if any) must match exactly
             if u[0:starIdx] != wildcard[0:starIdx]:
-                res.remove(u)
-    
+                matches.remove(u)
+                continue
+            # Any number of chars match star. 
+            # Chars after star must match exactly.
+            if starIdx < len(wildcard) - 1:
+                afterStar = wildcard[starIdx + 1:]
+                if len(u) < len(afterStar):
+                    matches.remove(u)
+                else:
+                    uAfterStar = u[-len(afterStar):]
+                    if afterStar != uAfterStar:
+                        matches.remove(u)
+        
     # return list of specific user
     else:
-        res = []
-        for u in matches:
+        matches = []
+        for u in allUsers:
             if u == wildcard:
-                res.append(u)
+                matches.append(u)
 
     # build formatted message for client
     userListMsg = "---------------\n"
     userListMsg += "Matching users: \n"
-    for user in res:
+    for user in matches:
         userListMsg += user + "\n"
     userListMsg += "---------------\n"
-    try:
-        clientSock.sendall(userListMsg.encode())
-    except:
-        pass
-    return res
+    return userListMsg

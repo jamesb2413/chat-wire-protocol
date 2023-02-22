@@ -57,7 +57,13 @@ def messageLoop(username, stub):
         print(senderResponse.msg)
         print("Command:")
     if command == 'L' or command == 'l':
-        pass
+        wildcard = input("Optional text wildcard: ")
+        if wildcard == "":
+            wildcard = "*"
+        listResponse = stub.List(chat_pb2.Payload(msg=wildcard))
+        print("Fetching users... \n")
+        print(listResponse.msg)
+        print("Command:")
     if command == 'O' or command == 'o':
         logoutResponse = stub.Logout(chat_pb2.Username(name=username))
         print("Logging out...")
