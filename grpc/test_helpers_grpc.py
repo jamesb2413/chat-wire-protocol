@@ -46,19 +46,20 @@ class TestgRPCHelpers(unittest.TestCase):
         # message sent from one client to another logged out user
         self.assertEqual(helpers_grpc.sendMsg("test1", "test3", "hello world", test_dict), "Message sent.\n")
     
-    # test_dict = {"test1":[True, []], "test2":[True, []], "test3":[True, []], "test4":[True, []], "foo":[True, []]}
-    #     good_message_1 = ["L", ""]
-    #     good_message_2 = ["L", "t*"]
-    #     good_message_3 = ["L", "test3"]
-    #     good_message_4 = ["L", "*"]
-    #     bad_message_1 = ["L", "*st1"]
-    #     # user enters nothing after list command
-    #     self.assertEqual(helpers_grpc.sendUserlist(good_message_1, 1, test_dict), ["test1", "test2", "test3", "test4", "foo"])
-    #     # user uses wildcard and characters
-    #     self.assertEqual(helpers_grpc.sendUserlist(good_message_2, 1, test_dict), ["test1", "test2", "test3", "test4"])
-    #     # user specifies specific user
-    #     self.assertEqual(helpers_grpc.sendUserlist(good_message_3, 1, test_dict), ["test3"])
-    #     # user uses wildcard only
-    #     self.assertEqual(helpers_grpc.sendUserlist(good_message_4, 1, test_dict), ["test1", "test2", "test3", "test4", "foo"])
-    #     # user uses wildcard only
-    #     self.assertEqual(helpers_grpc.sendUserlist(bad_message_1, 1, test_dict), -1)
+    def  test_sendUserList(self):
+        test_dict = {"test1":[True, []], "test2":[True, []], "test3":[True, []], "test4":[True, []], "foo":[True, []]}
+        good_message_1 = ""
+        good_message_2 = "t*"
+        good_message_3 = "test3"
+        good_message_4 = "*"
+        good_message_5 = "*st1"
+        # user enters nothing after list command
+        self.assertEqual(helpers_grpc.sendUserlist(good_message_1, test_dict), "---------------\nMatching users: \n---------------\n")
+        # user uses wildcard after characters
+        self.assertEqual(helpers_grpc.sendUserlist(good_message_2, test_dict), "---------------\nMatching users: \ntest1\ntest2\ntest3\ntest4\n---------------\n")
+        # user specifies specific user
+        self.assertEqual(helpers_grpc.sendUserlist(good_message_3, test_dict), "---------------\nMatching users: \ntest3\n---------------\n")
+        # user uses wildcard only
+        self.assertEqual(helpers_grpc.sendUserlist(good_message_4, test_dict), "---------------\nMatching users: \ntest1\ntest2\ntest3\ntest4\nfoo\n---------------\n")
+        # user uses wildcard before characters
+        self.assertEqual(helpers_grpc.sendUserlist(good_message_5, test_dict), "---------------\nMatching users: \ntest1\n---------------\n")
