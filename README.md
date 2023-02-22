@@ -99,7 +99,7 @@ and 'n' for no. If 'n', you will be returned to the operations menu. If 'y', you
 returned to the login screen. 
 
 -----------------------------------------------------------------------------------------------------------------------------------------------
-5. Operation - Unit Tests
+4. Operation - Unit Tests
 
 The unit tests for the custom wire protocol and gRPC applications can be found in test_helpers.py and test_helpers_gRPC.py. To run the tests in 
 test_helpers.py, in the terminal run:
