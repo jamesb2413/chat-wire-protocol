@@ -105,7 +105,9 @@ def listen_thread(username, stub, responseStream):
             return
 
 def run():
-    with grpc.insecure_channel('localhost:50051') as channel:
+    ip = '10.250.31.89'
+    port = '8080'
+    with grpc.insecure_channel('{}:{}'.format(ip, port)) as channel:
         stub = chat_pb2_grpc.ChatStub(channel)
         print("Congratulations! You have connected to the chat server.\n")
 

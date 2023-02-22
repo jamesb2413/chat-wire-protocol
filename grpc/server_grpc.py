@@ -50,10 +50,11 @@ class ChatServicer(chat_pb2_grpc.ChatServicer):
 
 
 def serve():
-    port = '50051'
+    ip = '10.250.31.89'
+    port = '8080'
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     chat_pb2_grpc.add_ChatServicer_to_server(ChatServicer(), server)
-    server.add_insecure_port('[::]:' + port)
+    server.add_insecure_port(f"{ip}:{port}")
     server.start()
     print("Server started, listening on " + port)
     server.wait_for_termination()
