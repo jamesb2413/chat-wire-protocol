@@ -159,26 +159,14 @@ def sendUserlist(message, clientSock, clientDict):
     wildcard = message[1].lower()
     allUsers, matches = list(clientDict.keys()), list(clientDict.keys())
 
-    #TODO: If * entered before characters, return error message
-
-    # return list of all users
-    if wildcard == "":
-        pass
-
     # return list of qualifying users
-    elif "*" in wildcard:
-        if wildcard[-1] != "*":
-            error_msg = "Wildcard must be inserted at the end of the string.\n"
-            try:
-                clientSock.sendall(error_msg.encode())
-            except:
-                pass
-            return -1
+    if "*" in wildcard:
         starIdx = wildcard.find("*")
         for u in allUsers:
             # Chars before star (if any) must match exactly
             if u[0:starIdx] != wildcard[0:starIdx]:
                 matches.remove(u)
+                continue
             # Any number of chars match star. 
             # Chars after star must match exactly.
             if starIdx < len(wildcard) - 1:
